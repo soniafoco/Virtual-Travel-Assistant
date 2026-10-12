@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Travel Assistant</title>
+
+  <!-- Font: Fraunces per i titoli e Plus Jakarta Sans per il testo (senza internet il browser usa i font del sistema) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header id="app-header">
+    <a class="brand" href="#chat"><span class="brand-icon">✈️</span> Virtual Travel <span class="brand-light">Assistant</span></a>
+
+    <!-- visibile solo dopo il login -->
+    <nav id="main-nav" hidden>
+      <a href="#chat" data-link="chat">Chat</a>
+      <a href="#history" data-link="history">Chat precedenti</a>
+      <a href="#bookings" data-link="bookings">Le mie prenotazioni</a>
+      <span id="user-name"></span>
+      <button type="button" id="logout-button">Esci</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Vista: accesso (login e registrazione) -->
+    <section id="view-auth" data-view="auth">
+
+      <!-- Banner: a sinistra il messaggio, a destra un paesaggio disegnato con il CSS -->
+      <div class="auth-hero">
+        <div class="hero-text">
+          <span class="hero-tag">Viaggi su misura, in una chat</span>
+          <h2>Il tuo prossimo viaggio inizia da una chat</h2>
+          <p>Dimmi budget, destinazione e cosa ti piace fare: all'itinerario completo pensa l'assistente.</p>
+          <ul class="hero-points">
+            <li>✈️ Voli di andata e ritorno</li>
+            <li>🏨 Un hotel per ogni notte</li>
+            <li>🎟️ Un'attività per ogni giorno</li>
+            <li>✅ Prenoti direttamente dalla chat</li>
+          </ul>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-sun"></div>
+          <div class="art-cloud art-cloud-1"></div>
+          <div class="art-cloud art-cloud-2"></div>
+          <div class="art-path"></div>
+          <span class="art-plane">✈️</span>
+          <div class="art-hills"></div>
+        </div>
+      </div>
+
+      <div class="auth-forms">
+        <form id="login-form" class="card">
+          <h3>Bentornato</h3>
+          <p class="card-hint">Accedi per riprendere le tue chat e le tue prenotazioni.</p>
+          <label>Email <input type="email" name="email" required autocomplete="email"></label>
+          <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+          <button type="submit">Accedi</button>
+        </form>
+
+        <form id="register-form" class="card">
+          <h3>Nuovo qui?</h3>
+          <p class="card-hint">Crea un account gratuito e organizza il tuo primo viaggio.</p>
+          <label>Nome <input type="text" name="name" required autocomplete="name"></label>
+          <label>Email <input type="email" name="email" required autocomplete="email"></label>
+          <label>Password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+          <button type="submit">Crea account</button>
+        </form>
+      </div>
+
+      <!-- Come funziona: tre passaggi -->
+      <ol class="steps">
+        <li><span class="step-number">1</span><strong>Racconta</strong> budget, meta, mese e preferenze.</li>
+        <li><span class="step-number">2</span><strong>Scegli</strong> tra gli itinerari che l'assistente costruisce per te.</li>
+        <li><span class="step-number">3</span><strong>Prenota</strong> con un messaggio e ritrovi tutto nella dashboard.</li>
+      </ol>
+    </section>
+
+    <!-- Vista: chat con l'assistente -->
+    <section id="view-chat" data-view="chat" hidden>
+      <div class="chat-layout">
+
+        <!-- Colonna laterale: idee per iniziare (i pulsanti riempiono il campo di testo) -->
+        <aside class="chat-side">
+          <h3>Da dove iniziare?</h3>
+          <p class="side-hint">Scrivi liberamente oppure parti da una di queste idee.</p>
+          <button type="button" class="suggestion" data-text="Vorrei andare in Spagna a novembre con un budget di 1500 euro">🌍 Una meta e un budget</button>
+          <button type="button" class="suggestion" data-text="Siamo in 4 e vorremmo un viaggio in Nord Europa, tra natura e cultura">👨‍👩‍👧‍👦 Viaggio di gruppo</button>
+          <button type="button" class="suggestion" data-text="Non so dove andare: cosa mi consigli?">🤔 Non so dove andare</button>
+          <button type="button" class="suggestion" data-text="Mostrami le mie prenotazioni">🧳 Le mie prenotazioni</button>
+        </aside>
+
+        <div class="chat-panel">
+          <div class="chat-head">
+            <div class="chat-avatar">🧭</div>
+            <div class="chat-head-text">
+              <h2>Assistente di viaggio</h2>
+              <p><span class="online-dot"></span> Pronto ad aiutarti</p>
+            </div>
+            <button type="button" id="new-chat-button" class="secondary-button">+ Nuova chat</button>
+          </div>
+
+          <div id="messages" aria-live="polite">
+            <!-- i messaggi (utente e assistente) e gli itinerari proposti vengono aggiunti qui -->
+          </div>
+
+          <p id="typing" hidden>L'assistente sta scrivendo...</p>
+
+          <form id="chat-form">
+            <input type="text" id="chat-input" name="message" placeholder="Scrivi un messaggio, per esempio: Vorrei andare in Spagna a novembre" autocomplete="off" required>
+            <button type="submit">Invia</button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Vista: chat precedenti dell'utente -->
+    <section id="view-history" data-view="history" hidden>
+      <div class="page-title">
+        <h2>Chat precedenti</h2>
+        <p>Riprendi una conversazione da dove l'avevi lasciata.</p>
+      </div>
+
+      <p id="history-empty" class="empty-message" hidden>Non hai ancora nessuna chat.</p>
+      <div id="history-list" class="card-grid">
+        <!-- una scheda per chat -->
+      </div>
+
+      <!-- la chat scelta, in sola lettura: la chat in corso non viene toccata -->
+      <div id="history-detail" hidden>
+        <button type="button" id="history-back-button" class="secondary-button">&larr; Torna all'elenco</button>
+        <h3 id="history-detail-title"></h3>
+        <div id="history-messages"></div>
+      </div>
+    </section>
+
+    <!-- Vista: dashboard prenotazioni, divisa per stato -->
+    <section id="view-bookings" data-view="bookings" hidden>
+      <div class="page-title">
+        <h2>Le mie prenotazioni</h2>
+        <p>Proposte in attesa, viaggi confermati e prenotazioni annullate.</p>
+      </div>
+
+      <p id="bookings-empty" class="empty-message" hidden>Non hai ancora nessuna prenotazione: chiedi all'assistente di organizzare un viaggio!</p>
+
+      <section class="bookings-group" data-group="proposed">
+        <h3>⏳ In sospeso <span class="count" id="count-proposed">0</span></h3>
+        <p class="group-hint">Proposte salvate dalla chat: non sono ancora prenotate, confermale per bloccare voli, hotel e attività.</p>
+        <p class="group-empty" id="empty-proposed">Nessuna proposta in sospeso.</p>
+        <div class="card-grid" id="list-proposed"></div>
+      </section>
+
+      <section class="bookings-group" data-group="confirmed">
+        <h3>✅ Confermate <span class="count" id="count-confirmed">0</span></h3>
+        <p class="group-empty" id="empty-confirmed">Nessuna prenotazione confermata.</p>
+        <div class="card-grid" id="list-confirmed"></div>
+      </section>
+
+      <section class="bookings-group" data-group="cancelled">
+        <h3>🚫 Annullate <span class="count" id="count-cancelled">0</span></h3>
+        <p class="group-empty" id="empty-cancelled">Nessuna prenotazione annullata.</p>
+        <div class="card-grid" id="list-cancelled"></div>
+      </section>
+    </section>
+
+  </main>
+
+  <footer id="app-footer">
+    Virtual Travel Assistant · progetto Challenge Reply
+  </footer>
+
+  <!-- Finestra con il dettaglio di una prenotazione (si apre dal pulsante "Dettaglio") -->
+  <dialog id="booking-dialog">
+    <button type="button" id="close-dialog" aria-label="Chiudi">✕</button>
+    <div id="dialog-content"></div>
+  </dialog>
+
+  <!-- Modelli da clonare con JavaScript: il testo dell'utente e dell'LLM va inserito con textContent -->
+
+  <template id="message-template">
+    <div class="message">
+      <strong class="message-author"></strong>
+      <p class="message-text"></p>
+    </div>
+  </template>
+
+  <!-- L'itinerario è un "biglietto": in alto la foto con l'etichetta, poi i dettagli, in fondo il totale -->
+  <template id="itinerary-template">
+    <article class="itinerary">
+      <div class="cover">
+        <img class="hotel-photo" alt="" hidden>
+        <h3 class="itinerary-label"></h3>
+      </div>
+
+      <div class="itinerary-body">
+        <header>
+          <p class="itinerary-trip"></p> <!-- citta', date, notti -->
+        </header>
+
+        <section class="itinerary-flights">
+          <h4>✈️ Voli</h4>
+          <ul>
+            <li class="flight-out"></li>
+            <li class="flight-return"></li>
+          </ul>
+        </section>
+
+        <section class="itinerary-hotel">
+          <h4>🏨 Hotel</h4>
+          <p class="hotel-name"></p>
+          <p class="hotel-rooms"></p>
+          <p class="hotel-credit"></p>
+        </section>
+
+        <section class="itinerary-days">
+          <h4>📅 Giorno per giorno</h4>
+          <ol class="days-list"></ol>
+        </section>
+
+        <footer>
+          <p class="itinerary-total"></p>
+          <button type="button" class="save-button">Scegli questo itinerario</button>
+        </footer>
+      </div>
+    </article>
+  </template>
+
+  <template id="history-template">
+    <article class="history-item">
+      <h3 class="history-title"></h3>
+      <p class="history-info"></p>
+      <button type="button" class="open-chat-button">Leggi la chat</button>
+    </article>
+  </template>
+
+  <template id="booking-template">
+    <article class="booking">
+      <div class="cover">
+        <img class="booking-photo" alt="" hidden>
+        <span class="booking-status"></span>
+      </div>
+
+      <div class="booking-body">
+        <h3 class="booking-city"></h3>
+        <p class="booking-hotel"></p>
+        <p class="booking-dates"></p>
+        <p class="booking-travelers"></p>
+        <p class="booking-total"></p>
+
+        <div class="booking-actions">
+          <button type="button" class="detail-button secondary-button">Dettaglio</button>
+          <button type="button" class="confirm-button" hidden>Conferma</button>
+          <button type="button" class="cancel-button">Annulla</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/bookings.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

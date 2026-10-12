@@ -1,0 +1,102 @@
+# =============================== Chat e embedding ===============================
+# Due provider indipendenti. Chat (llm_provider): "gemini" (default), "groq" o "huggingface".
+# Embedding (embedding_provider): "gemini" o "huggingface"; cambiandolo va rilanciato: python -m scripts.index_vectors
+llm_provider: gemini
+embedding_provider: gemini        
+
+llm_temperature: null    # null = default del modello
+
+gemini_model: gemini-3.5-flash-lite
+gemini_embedding_model: gemini-embedding-001
+gemini_embedding_task_type: SEMANTIC_SIMILARITY
+
+# Hugging Face: la chat usa l'Inference API (serve HF_TOKEN), gli embedding girano in locale
+hf_model: HuggingFaceTB/SmolLM-135M
+hf_max_new_tokens: 1024
+embedding_model: paraphrase-multilingual-MiniLM-L12-v2
+
+# Groq (serve GROQ_API_KEY in .env): solo chat. Serve un modello di chat con tool use, non un classificatore
+# come prompt-guard
+groq_model: openai/gpt-oss-120b
+
+# =============================== RAG e ricerca attivita' ===============================
+chroma_collection: activities     # il nome reale ha il suffisso del provider: activities_gemini
+
+# Affinita' minima (coseno) perche' un'attivita' sia proposta da search_activities. Dipende dal modello di
+# embedding: misurata su richieste pertinenti (da 0.86 Gemini, da 0.57 locale) e senza corrispondenza
+# (fino a 0.80 Gemini, fino a 0.39 locale).
+min_affinity:
+  gemini: 0.82
+  huggingface: 0.45
+
+max_activities: 10                # quante attivita' mostra al massimo search_activities
+
+# Una parola sola e' una richiesta povera per l'embedding: se la preferenza e' una di queste chiavi viene
+# sostituita dalla frase. Qualsiasi altro testo dell'utente va alla ricerca cosi' com'e'.
+category_queries:
+  cultura: visite a musei, monumenti, siti storici e architettura
+  sport: attivita sportive e movimento all'aria aperta
+  relax: relax, benessere, spa e momenti di tranquillita
+  nightlife: vita notturna, locali, musica e feste serali
+  natura: natura, paesaggi, escursioni e panorami
+  gastronomia: cibo, cucina locale, degustazioni e vino
+  shopping: shopping, mercati, botteghe artigiane, vintage e souvenir
+  avventura: avventura e adrenalina, arrampicata, rafting, canyoning e sport estremi
+  famiglia: attivita adatte ai bambini e alle famiglie, parchi, zoo, acquari e giochi
+  musica: musica dal vivo, concerti classici, opera, balletto e spettacoli teatrali
+  romantico: momenti romantici per coppie, tramonti, cene a lume di candela e crociere
+  laboratori: laboratori creativi e artigianali, ceramica, mosaico, vetro e corsi pratici
+
+# =============================== Chat ===============================
+chat_history_messages: 20         # quanti messaggi precedenti dare al modello a ogni risposta (limita i token)
+
+# =============================== Tracing (Phoenix) ===============================
+# Phoenix mostra le trace dell'agente (chiamate al modello, tool, input e output) su http://localhost:6006.
+# Il server va avviato a parte: .venv-phoenix\Scripts\phoenix serve
+tracing_enabled: true
+phoenix_endpoint: http://localhost:6006/v1/traces
+phoenix_project: virtual-travel-assistant
+
+# =============================== Planner e requisiti ===============================
+planner_alternatives: 3           # alternative (le piu' affini) oltre ai 2 itinerari in evidenza
+home_country: Italia              # i voli di rientro hanno questa destinazione: da qui si riconoscono le partenze
+max_travelers: 8
+default_nights: 7
+min_nights: 1
+max_nights: 14
+
+# Aeroporti che find_airport sa riconoscere (codice IATA, nome, citta'). Aggiungere qui un aeroporto
+# non crea voli: voli_disponibili dipende dai voli presenti nel database.
+airports:
+  - {code: MXP, name: Malpensa, city: Milano}
+  - {code: LIN, name: Linate, city: Milano}
+  - {code: BGY, name: Orio al Serio, city: Bergamo}
+  - {code: FCO, name: Fiumicino Leonardo da Vinci, city: Roma}
+  - {code: CIA, name: Ciampino, city: Roma}
+  - {code: TRN, name: Caselle Sandro Pertini, city: Torino}
+  - {code: VCE, name: Marco Polo, city: Venezia}
+  - {code: TSF, name: Treviso Canova, city: Treviso}
+  - {code: BLQ, name: Guglielmo Marconi, city: Bologna}
+  - {code: FLR, name: Peretola Amerigo Vespucci, city: Firenze}
+  - {code: PSA, name: Galileo Galilei, city: Pisa}
+  - {code: NAP, name: Capodichino, city: Napoli}
+  - {code: BRI, name: Karol Wojtyla, city: Bari}
+  - {code: CTA, name: Fontanarossa, city: Catania}
+  - {code: PMO, name: Falcone Borsellino, city: Palermo}
+  - {code: CAG, name: Elmas, city: Cagliari}
+  - {code: GOA, name: Cristoforo Colombo, city: Genova}
+  - {code: VRN, name: Valerio Catullo, city: Verona}
+
+# =============================== Server ===============================
+# reseed: false = `python -m scripts.seed` non tocca un database che ha gia' dei dati (chat e prenotazioni al sicuro);
+# true = cancella tutto e lo ricrea da zero. Con false, per rifare il seed bisogna prima metterlo a true.
+reseed: false
+# DATABASE_URL, CHROMA_PATH, LOG_FILE e LOG_LEVEL stanno in .env (percorsi relativi a backend/)
+access_token_minutes: 120
+cors_origins:
+  - http://localhost:5173
+
+log_format: "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
+log_max_bytes: 1000000
+log_body_chars: 1000              # i testi piu' lunghi (corpo di richieste e risposte, risultati dei tool) vengono accorciati
+log_backup_count: 5

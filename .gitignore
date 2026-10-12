@@ -1,0 +1,33 @@
+# Ambiente virtuale
+.venv/
+.venv-phoenix/
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets
+.env
+
+# Database locali e dati generati
+*.db
+*.sqlite3
+chroma_data/
+
+# Log
+logs/
+*.log
+
+# Cache dei modelli di embedding (se scaricati nella repo)
+.cache/
+models_cache/
+
+# IDE e sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
