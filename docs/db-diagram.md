@@ -139,7 +139,6 @@ erDiagram
 
 ## Note sul diagramma
 
-- **Simboli sulle linee**: `||` esattamente uno, `|o` zero o uno, `o{` zero o molti, `|{` uno o molti.
 - **`BOOKINGS`**: una riga per prenotazione con i dati generali; il dettaglio sta nelle tabelle figlie `BOOKING_FLIGHTS` (andata e ritorno), `BOOKING_ROOMS` (una riga per camera e notte) e `BOOKING_ACTIVITIES` (una riga per attività e giorno), con chiave esterna verso le righe di disponibilità: confermare e annullare toccano quelle righe. I prezzi sono quelli del momento della proposta.
 - **`ROOMS`**: una riga per camera fisica; `ROOM_AVAILABILITY.is_free` dice se è ancora libera in quella notte.
 - **Unicità composte** (non disegnabili in Mermaid): `ROOM_AVAILABILITY(room_id, night)` e `ACTIVITY_AVAILABILITY(activity_id, day)`.
