@@ -77,7 +77,7 @@ def precarica() -> None:
         collezione.count(), settings.embedding_provider, time.time() - inizio,
     )
     if collezione.count() == 0:
-        logger.warning("L'indice vettoriale e' vuoto: lancia 'python -m scripts.index_vectors'")
+        logger.warning("L'indice vettoriale e' vuoto: lancia 'python -m db_scripts.index_vectors'")
 
 def reset_collection(name: str = settings.chroma_collection):
     """Cancella e ricrea la collezione (serve se cambia il formato dei documenti)."""
@@ -166,4 +166,7 @@ def rank_activities(
             score = 1 - distance
             best[int(id_)] = max(score, best.get(int(id_), score))
 
-    return sorted(best.items(), key=lambda pair: pair[1], reverse=True)
+    def per_punteggio(pair):
+        return pair[1]
+
+    return sorted(best.items(), key=per_punteggio, reverse=True)

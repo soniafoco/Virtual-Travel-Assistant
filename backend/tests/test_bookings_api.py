@@ -12,7 +12,7 @@ from app.models.models import Activity, Booking, RoomAvailability, User
 from app.schemas.itinerary import Requirements
 from app.services import booking
 from app.services.planner import plan_trips
-from scripts.seed import seed
+from db_scripts.seed import seed
 
 TODAY = date(2026, 10, 12)
 

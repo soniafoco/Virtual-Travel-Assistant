@@ -1,8 +1,8 @@
 """Crea le tabelle del database SQLite a partire dai modelli.
 
 Uso (da backend/):
-    python -m scripts.init_db            # crea le tabelle mancanti
-    python -m scripts.init_db --reset    # cancella tutto e ricrea (serve se lo schema e' cambiato)
+    python -m db_scripts.init_db            # crea le tabelle mancanti
+    python -m db_scripts.init_db --reset    # cancella tutto e ricrea (serve se lo schema e' cambiato)
 """
 
 import sys

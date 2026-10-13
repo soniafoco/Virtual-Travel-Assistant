@@ -67,15 +67,6 @@ function dopoCambioUtente()
 }
 
 
-// Funzione chiamata quando l'utente clicca su un suggerimento: la frase va nel campo di testo, pronta da inviare o modificare
-function usaSuggerimento(evento)
-{
-    var campo = document.getElementById("chat-input");
-    campo.value = evento.currentTarget.dataset.text;
-    campo.focus();
-}
-
-
 // Funzione chiamata all'apertura della pagina: collega i form e le funzioni, poi mostra la vista giusta
 async function avvia()
 {
@@ -86,13 +77,6 @@ async function avvia()
     document.getElementById("history-back-button").addEventListener("click", mostraElencoChat);
     document.getElementById("logout-button").addEventListener("click", esci);
     window.addEventListener("hashchange", mostraVista);
-
-    // I pulsanti dei suggerimenti nella colonna laterale della chat scrivono la frase nel campo di testo
-    var suggerimenti = document.querySelectorAll(".suggestion");
-    for(var i = 0; i < suggerimenti.length; i++)
-    {
-        suggerimenti[i].addEventListener("click", usaSuggerimento);
-    }
 
     // La finestra del dettaglio si chiude con la X oppure cliccando fuori dalla finestra
     var finestra = document.getElementById("booking-dialog");

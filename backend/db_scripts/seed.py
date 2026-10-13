@@ -1,7 +1,7 @@
 """Popola il database con dati sintetici ma riproducibili.
 
 Uso (da backend/):
-    python -m scripts.seed
+    python -m db_scripts.seed
 
 Cancella e ricrea tutte le tabelle, poi inserisce:
   - contenuto curato (citta', hotel, attivita': vedi seed_data.py)
@@ -27,9 +27,9 @@ from app.models.models import (
     RoomAvailability,
     User,
 )
-from scripts.hotel_photos import carica_foto
-from scripts.init_db import init_db
-from scripts.seed_data import (
+from db_scripts.hotel_photos import carica_foto
+from db_scripts.init_db import init_db
+from db_scripts.seed_data import (
     ACTIVITIES,
     CITIES,
     DAYS,
@@ -55,7 +55,7 @@ def build_dataset(start: date, rng_seed: int = 42, num_days: int = DAYS) -> dict
     rng = random.Random(rng_seed)
     days = [start + timedelta(days=i) for i in range(num_days)]
 
-    photos = carica_foto()  # foto degli hotel (scripts/hotel_photos.json), se sono state scaricate
+    photos = carica_foto()  # foto degli hotel (db_scripts/hotel_photos.json), se sono state scaricate
     hotels, base_price = [], {}
     for city in CITIES:
         for name, stars, price, description in HOTELS[city["city"]]:

@@ -8,9 +8,9 @@ from app.models.models import Activity, Hotel
 from app.schemas.itinerary import Requirements
 from app.services import booking
 from app.services.planner import plan_trips
-from scripts.hotel_photos import carica_foto
-from scripts.seed import seed
-from scripts.seed_data import HOTELS
+from db_scripts.hotel_photos import carica_foto
+from db_scripts.seed import seed
+from db_scripts.seed_data import HOTELS
 
 TODAY = date(2026, 10, 12)
 

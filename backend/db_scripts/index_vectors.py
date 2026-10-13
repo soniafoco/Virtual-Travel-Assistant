@@ -1,8 +1,8 @@
 """Indicizza le attivita' di SQLite nel database vettoriale (ChromaDB).
 
 Uso (da backend/, dopo il seed):
-    python -m scripts.index_vectors            # allinea l'indice (idempotente)
-    python -m scripts.index_vectors --reset    # cancella e ricrea la collezione
+    python -m db_scripts.index_vectors            # allinea l'indice (idempotente)
+    python -m db_scripts.index_vectors --reset    # cancella e ricrea la collezione
 """
 
 import sys

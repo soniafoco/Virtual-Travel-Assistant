@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
 
@@ -56,7 +56,8 @@
       </div>
 
       <div class="auth-forms">
-        <form id="login-form" class="card">
+        <!-- novalidate: i controlli li fa JavaScript (con i nostri messaggi), non il browser -->
+        <form id="login-form" class="card" novalidate>
           <h3>Bentornato</h3>
           <p class="card-hint">Accedi per riprendere le tue chat e le tue prenotazioni.</p>
           <label>Email <input type="email" name="email" required autocomplete="email"></label>
@@ -64,12 +65,12 @@
           <button type="submit">Accedi</button>
         </form>
 
-        <form id="register-form" class="card">
+        <form id="register-form" class="card" novalidate>
           <h3>Nuovo qui?</h3>
           <p class="card-hint">Crea un account gratuito e organizza il tuo primo viaggio.</p>
-          <label>Nome <input type="text" name="name" required autocomplete="name"></label>
+          <label>Nome <input type="text" name="name" required maxlength="100" autocomplete="name"></label>
           <label>Email <input type="email" name="email" required autocomplete="email"></label>
-          <label>Password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+          <label>Password <input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password"></label>
           <button type="submit">Crea account</button>
         </form>
       </div>
@@ -85,16 +86,6 @@
     <!-- Vista: chat con l'assistente -->
     <section id="view-chat" data-view="chat" hidden>
       <div class="chat-layout">
-
-        <!-- Colonna laterale: idee per iniziare (i pulsanti riempiono il campo di testo) -->
-        <aside class="chat-side">
-          <h3>Da dove iniziare?</h3>
-          <p class="side-hint">Scrivi liberamente oppure parti da una di queste idee.</p>
-          <button type="button" class="suggestion" data-text="Vorrei andare in Spagna a novembre con un budget di 1500 euro">🌍 Una meta e un budget</button>
-          <button type="button" class="suggestion" data-text="Siamo in 4 e vorremmo un viaggio in Nord Europa, tra natura e cultura">👨‍👩‍👧‍👦 Viaggio di gruppo</button>
-          <button type="button" class="suggestion" data-text="Non so dove andare: cosa mi consigli?">🤔 Non so dove andare</button>
-          <button type="button" class="suggestion" data-text="Mostrami le mie prenotazioni">🧳 Le mie prenotazioni</button>
-        </aside>
 
         <div class="chat-panel">
           <div class="chat-head">

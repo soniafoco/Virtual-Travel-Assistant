@@ -5,7 +5,7 @@ ricche e varie. Disponibilita' e voli NON stanno qui: li genera seed.py con rego
 """
 
 DAYS = 365  # finestra di disponibilita' (giorni a partire dalla data di seed)
-DEMO_DAYS = 90  # finestra del database demo (python -m scripts.seed): piu' piccolo e leggibile
+DEMO_DAYS = 90  # finestra del database demo (python -m db_scripts.seed): piu' piccolo e leggibile
 
 CATEGORIES = (
     "cultura", "sport", "relax", "nightlife", "natura", "gastronomia",

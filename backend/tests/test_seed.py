@@ -8,8 +8,8 @@ from sqlalchemy import func, select
 
 from app.auth.security import verify_password
 from app.models.models import Hotel, User
-from scripts.seed import build_dataset, seed
-from scripts.seed_data import (
+from db_scripts.seed import build_dataset, seed
+from db_scripts.seed_data import (
     CATEGORIES,
     CITIES,
     DAYS,

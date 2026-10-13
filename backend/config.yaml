@@ -1,6 +1,6 @@
 # =============================== Chat e embedding ===============================
 # Due provider indipendenti. Chat (llm_provider): "gemini" (default), "groq" o "huggingface".
-# Embedding (embedding_provider): "gemini" o "huggingface"; cambiandolo va rilanciato: python -m scripts.index_vectors
+# Embedding (embedding_provider): "gemini" o "huggingface"; cambiandolo va rilanciato: python -m db_scripts.index_vectors
 llm_provider: gemini
 embedding_provider: gemini        
 
@@ -88,7 +88,7 @@ airports:
   - {code: VRN, name: Valerio Catullo, city: Verona}
 
 # =============================== Server ===============================
-# reseed: false = `python -m scripts.seed` non tocca un database che ha gia' dei dati (chat e prenotazioni al sicuro);
+# reseed: false = `python -m db_scripts.seed` non tocca un database che ha gia' dei dati (chat e prenotazioni al sicuro);
 # true = cancella tutto e lo ricrea da zero. Con false, per rifare il seed bisogna prima metterlo a true.
 reseed: false
 # DATABASE_URL, CHROMA_PATH, LOG_FILE e LOG_LEVEL stanno in .env (percorsi relativi a backend/)

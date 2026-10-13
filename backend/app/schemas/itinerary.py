@@ -18,6 +18,7 @@ class Requirements(BaseModel):
     country: str = Field(min_length=1)
     activities: list[str] = Field(min_length=1, description="Preferenze: categorie o testo libero")
     month: int = Field(ge=1, le=12, description="Mese di partenza (1-12)")
+    departure_date: date | None = Field(default=None, description="Giorno di partenza esatto (facoltativo, deve cadere nel mese)")
     travelers: int = Field(default=1, ge=1, le=settings.max_travelers)
     nights: int = Field(default=settings.default_nights, ge=settings.min_nights, le=settings.max_nights)
 
@@ -44,7 +45,7 @@ class HotelStay(BaseModel):
     hotel_id: int
     name: str
     stars: int
-    image_url: str | None = None  # foto dell'hotel (vedi scripts/fetch_hotel_photos.py)
+    image_url: str | None = None  # foto dell'hotel (vedi db_scripts/fetch_hotel_photos.py)
     image_credit: str | None = None  # autore e licenza della foto
     rooms: list[RoomStay]  # le camere scelte, tutte libere per tutte le notti
 

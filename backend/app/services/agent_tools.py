@@ -144,15 +144,19 @@ def build_tools(ctx: AgentContext) -> list[BaseTool]:
     @tool
     def generate_itineraries(
         budget: float, country: str, activities: list[str], month: int, home_airport: str,
-        travelers: int = 1, nights: int = 7,
+        travelers: int = 1, nights: int = 7, departure_date: str | None = None,
     ) -> str:
         """Costruisce gli itinerari (volo andata e ritorno, hotel, un'attivita' al giorno) entro il budget.
         Chiamalo solo quando hai tutti i dati. budget = totale in euro per tutti; month = 1-12;
-        home_airport = codice IATA di partenza. Restituisce gli itinerari numerati, oppure il motivo per cui
-        non esistono (se il budget e' troppo basso indica la cifra minima)."""
+        home_airport = codice IATA di partenza. departure_date = giorno di partenza esatto in formato AAAA-MM-GG:
+        passalo SEMPRE se l'utente indica o cambia la data (es. "dal 13 al 18 novembre" = departure_date del 13
+        e nights = 5); il mese deve coincidere. Senza departure_date il planner sceglie lui i giorni nel mese.
+        Restituisce gli itinerari numerati, oppure il motivo per cui non esistono (se il budget e' troppo basso
+        indica la cifra minima)."""
         try:
             req = Requirements(
                 budget=budget, country=country, activities=activities, month=month, travelers=travelers, nights=nights,
+                departure_date=departure_date or None,
             )
         except ValidationError as error:
             return "Dati non validi: " + "; ".join(f"{e['loc'][0]}: {e['msg']}" for e in error.errors())

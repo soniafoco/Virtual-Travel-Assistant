@@ -39,7 +39,7 @@ class Hotel(Base):
     city: Mapped[str] = mapped_column(String(80))
     stars: Mapped[int] = mapped_column(Integer)
     description: Mapped[str] = mapped_column(Text, default="")
-    image_url: Mapped[str | None] = mapped_column(String(500), default=None)  # foto (scripts/fetch_hotel_photos.py)
+    image_url: Mapped[str | None] = mapped_column(String(500), default=None)  # foto (db_scripts/fetch_hotel_photos.py)
     image_credit: Mapped[str | None] = mapped_column(String(300), default=None)  # autore e licenza della foto
 
     rooms: Mapped[list["Room"]] = relationship(back_populates="hotel")

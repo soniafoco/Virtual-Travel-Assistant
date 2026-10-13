@@ -23,7 +23,7 @@ from app.services import booking
 from app.services.agent_tools import AgentContext, build_tools
 from app.services.booking import BookingError
 from app.services.planner import plan_trips
-from scripts.seed import seed
+from db_scripts.seed import seed
 
 TODAY = date(2026, 10, 12)
 TRAVELERS = 2

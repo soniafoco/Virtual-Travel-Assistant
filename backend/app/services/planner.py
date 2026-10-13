@@ -141,10 +141,12 @@ def assign_activities(
     in quella data non c'e' nessuna attivita' disponibile.
     """
     # per ogni giorno le attivita' disponibili, dalla migliore alla peggiore (a parita': id piu' basso)
-    ordered = {
-        day: sorted(options.get(day, []), key=lambda pair: (score(pair[0]), -pair[0].id), reverse=True)
-        for day in dates
-    }
+    def per_punteggio(pair):
+        return (score(pair[0]), -pair[0].id)
+
+    ordered = {}
+    for day in dates:
+        ordered[day] = sorted(options.get(day, []), key=per_punteggio, reverse=True)
     owner: dict[int, date] = {}  # id attivita' -> giorno in cui e' stata messa
     picks: dict[date, tuple[Activity, ActivityAvailability] | None] = {day: None for day in dates}
 
@@ -160,7 +162,10 @@ def assign_activities(
                 return True
         return False
 
-    for day in sorted(dates, key=lambda d: (len(ordered[d]), d)):  # prima i giorni con meno scelta
+    def per_scelta(d):
+        return (len(ordered[d]), d)
+
+    for day in sorted(dates, key=per_scelta):  # prima i giorni con meno scelta
         place(day, set())
 
     # le attivita' diverse sono finite: si ripete la migliore disponibile del giorno
@@ -178,11 +183,16 @@ def assign_activities(
 def plans_for(dates: list[date], options: ActivityOptions, travelers: int, affinity: dict[int, float]) -> list[ActivityPlan]:
     """I due piani di attivita' per le stesse date, dal piu' adatto al piu' economico:
     "match" (solo affinita') ed "economico" (l'attivita' piu' a buon mercato di ogni giorno)."""
-    scores = [
-        lambda a: (affinity.get(a.id, 0.0),),
-        lambda a: (-float(a.price), affinity.get(a.id, 0.0)),
+    def per_affinita(a):
+        return (affinity.get(a.id, 0.0),)
+
+    def per_prezzo(a):
+        return (-float(a.price), affinity.get(a.id, 0.0))
+
+    return [
+        assign_activities(dates, options, travelers, affinity, per_affinita),
+        assign_activities(dates, options, travelers, affinity, per_prezzo),
     ]
-    return [assign_activities(dates, options, travelers, affinity, score) for score in scores]
 
 # --- caricamento dati -------------------------------------------------------
 
@@ -425,7 +435,13 @@ def plan_trips(
         ))
 
     first, last = departure_window(req.month, today)
-    affinity = dict(ranker(req.activities, req.country))
+    if req.departure_date:  # data esatta richiesta: si parte solo quel giorno (se e' nel mese e da domani in poi)
+        if not first <= req.departure_date <= last:
+            return PlanResult(failure=PlanningFailure(
+                code="no_flights", message=f"La data di partenza {req.departure_date} non e' valida: deve essere futura e nel mese richiesto.",
+            ))
+        first = last = req.departure_date
+    affinity =dict(ranker(req.activities, req.country))
 
     candidates: list[Candidate] = []
     pairs_found = activities_found = False

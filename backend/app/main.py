@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.auth.router import router as auth_router
 from app.bookings.router import router as bookings_router
@@ -15,8 +16,11 @@ from app.db.session import Base, engine
 from app.models import models
 from app.services.rag import precarica
 
+# Avvia logs e traces su Phoenix
 setup_logging()
 setup_tracing()
+
+# Crea tabelle nel db se non esistono
 Base.metadata.create_all(engine)
 
 logger = logging.getLogger(__name__)
@@ -33,7 +37,7 @@ async def lifespan(app):
     yield
 
 
-app = FastAPI(title="Virtual Travel Assistant", lifespan=lifespan)
+app = FastAPI(title="Virtual Travel Assistant", lifespan=lifespan) 
 
 app.middleware("http")(log_richieste)  # scrive nel log ogni richiesta e ogni risposta
 
@@ -44,6 +48,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def home():
+    return RedirectResponse("/docs")  # il backend e' solo un'API: rimanda alla documentazione
 
 @app.get("/api/health")
 def health():

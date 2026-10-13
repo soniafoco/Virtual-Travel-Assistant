@@ -38,7 +38,8 @@ async function leggiErrore(risposta)
             var messaggi = [];
             for(var i = 0; i < dati.detail.length; i++)
             {
-                messaggi.push(dati.detail[i].msg);
+                // Pydantic aggiunge "Value error, " davanti ai nostri messaggi: lo tolgo
+                messaggi.push(dati.detail[i].msg.replace("Value error, ", ""));
             }
             return messaggi.join("; ");
         }

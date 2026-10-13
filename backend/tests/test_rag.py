@@ -22,8 +22,8 @@ from app.services.rag import (
     rank_activities,
     reset_collection,
 )
-from scripts.seed import seed
-from scripts.seed_data import ACTIVITIES, CATEGORIES
+from db_scripts.seed import seed
+from db_scripts.seed_data import ACTIVITIES, CATEGORIES
 
 TOTALE_ATTIVITA = sum(len(lista) for lista in ACTIVITIES.values())
 

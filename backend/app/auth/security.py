@@ -12,6 +12,8 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def verify_password(password: str, password_hash: str) -> bool:
+    if len(password.encode()) > 72:  # bcrypt rifiuta oltre 72 byte (errore 500): una password cosi' lunga non puo' essere quella giusta
+        return False
     return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 def create_access_token(user_id: int) -> str:

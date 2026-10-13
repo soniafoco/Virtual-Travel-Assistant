@@ -35,14 +35,10 @@
 }
 
 
-/* Stile del body: sfondo color sabbia con due aloni di luce */
+/* Stile del body: sfondo color sabbia */
 body{
     margin: 0;
-    background:
-        radial-gradient(circle at 0 -5%, rgba(44, 196, 181, 0.16) 0, transparent 34rem),
-        radial-gradient(circle at 100% 0, rgba(255, 180, 76, 0.2) 0, transparent 30rem),
-        var(--sabbia);
-    background-attachment: fixed;
+    background-color: var(--sabbia);
     color: var(--testo);
     font-family: 'Plus Jakarta Sans', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
     font-size: 1.02rem;
@@ -69,21 +65,6 @@ p{
     margin: 0.3rem 0;
 }
 
-/* Barra di scorrimento sottile */
-*{
-    scrollbar-width: thin;
-    scrollbar-color: #c9bda5 transparent;
-}
-
-/* Ogni vista compare con una piccola dissolvenza */
-@keyframes comparsa{
-    from{ opacity: 0; transform: translateY(0.7rem); }
-    to{ opacity: 1; transform: none; }
-}
-
-section[data-view]{
-    animation: comparsa 0.4s ease-out;
-}
 
 
 /* ---------- Intestazione ---------- */
@@ -144,7 +125,6 @@ section[data-view]{
     font-weight: 600;
     font-size: 0.95rem;
     text-decoration: none;
-    transition: background-color 0.15s, color 0.15s;
 }
 
 #main-nav a:hover{
@@ -281,7 +261,6 @@ input{
     color: var(--testo);
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 
 input:focus{
@@ -302,18 +281,10 @@ button{
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
-    box-shadow: 0 0.35rem 0.9rem rgba(226, 82, 60, 0.32);
-    transition: transform 0.12s, box-shadow 0.15s, filter 0.15s;
 }
 
 button:hover{
     filter: brightness(1.07);
-    box-shadow: 0 0.55rem 1.3rem rgba(226, 82, 60, 0.4);
-    transform: translateY(-0.1rem);
-}
-
-button:active{
-    transform: translateY(0.05rem);
 }
 
 button:focus-visible{
@@ -337,11 +308,6 @@ button:focus-visible{
 
 .confirm-button{
     background: linear-gradient(120deg, #0f9d63, #19b777);
-    box-shadow: 0 0.35rem 0.9rem rgba(15, 157, 99, 0.3);
-}
-
-.confirm-button:hover{
-    box-shadow: 0 0.55rem 1.3rem rgba(15, 157, 99, 0.4);
 }
 
 .cancel-button{
@@ -451,7 +417,6 @@ button:focus-visible{
     height: 1.6rem;
     border-radius: 2rem;
     background-color: rgba(255, 255, 255, 0.85);
-    animation: nuvola 14s ease-in-out infinite alternate;
 }
 
 .art-cloud::before{
@@ -476,13 +441,6 @@ button:focus-visible{
     right: 6%;
     width: 4.5rem;
     opacity: 0.7;
-    animation-duration: 18s;
-    animation-direction: alternate-reverse;
-}
-
-@keyframes nuvola{
-    from{ transform: translateX(-0.8rem); }
-    to{ transform: translateX(1.2rem); }
 }
 
 /* L'arco tratteggiato della rotta; l'aereo sta alla fine dell'arco */
@@ -504,13 +462,6 @@ button:focus-visible{
     top: 20%;
     left: 13%;
     font-size: 2.2rem;
-    transform: rotate(0deg);
-    animation: volo 5s ease-in-out infinite alternate;
-}
-
-@keyframes volo{
-    from{ transform: translateY(0.3rem) rotate(-4deg); }
-    to{ transform: translateY(-0.5rem) rotate(4deg); }
 }
 
 /* Due colline sovrapposte in basso */
@@ -603,57 +554,6 @@ button:focus-visible{
 
 /* ---------- Chat ---------- */
 
-.chat-layout{
-    display: grid;
-    grid-template-columns: 17rem 1fr;
-    gap: 1.6rem;
-    align-items: start;
-}
-
-/* Colonna laterale con i suggerimenti: resta ferma mentre si scorre la chat */
-.chat-side{
-    position: sticky;
-    top: 6rem;
-    padding: 1.4rem;
-    border: 0.06rem solid var(--bordo);
-    border-radius: var(--raggio);
-    background-color: rgba(255, 255, 255, 0.75);
-    box-shadow: var(--ombra);
-}
-
-.chat-side h3{
-    font-size: 1.25rem;
-}
-
-.side-hint{
-    margin-bottom: 1rem;
-    color: var(--grigio);
-    font-size: 0.9rem;
-}
-
-/* I pulsanti dei suggerimenti: bianchi, con un bordo che si colora al passaggio del mouse */
-.suggestion{
-    display: block;
-    width: 100%;
-    margin-bottom: 0.6rem;
-    padding: 0.7rem 0.9rem;
-    border: 0.08rem solid var(--bordo);
-    border-radius: 0.9rem;
-    background: white;
-    color: var(--notte-chiaro);
-    font-size: 0.92rem;
-    font-weight: 600;
-    text-align: left;
-    box-shadow: none;
-}
-
-.suggestion:hover{
-    border-color: var(--turchese);
-    background: var(--turchese-chiaro);
-    box-shadow: none;
-    filter: none;
-}
-
 /* Il pannello della chat: barra in alto, messaggi, campo di testo */
 .chat-panel{
     overflow: hidden;
@@ -725,10 +625,7 @@ button:focus-visible{
     max-height: 62vh;
     overflow-y: auto;
     padding: 1.4rem 1.6rem;
-    background:
-        radial-gradient(circle at 100% 0, rgba(44, 196, 181, 0.08), transparent 18rem),
-        radial-gradient(circle at 0 100%, rgba(255, 180, 76, 0.1), transparent 18rem),
-        #fffdf9;
+    background-color: #fffdf9;
 }
 
 #history-messages{
@@ -755,7 +652,6 @@ button:focus-visible{
     margin: 0.8rem 0;
     padding: 0.7rem 1.1rem;
     border-radius: 1.2rem;
-    animation: comparsa 0.25s ease-out;
 }
 
 /* I messaggi dell'utente sono a destra e blu notte, quelli dell'assistente a sinistra e bianchi */
@@ -804,19 +700,13 @@ button:focus-visible{
     color: white;
 }
 
-/* "L'assistente sta scrivendo..." che lampeggia piano */
-@keyframes puntini{
-    0%, 100%{ opacity: 0.25; }
-    50%{ opacity: 1; }
-}
-
+/* "L'assistente sta scrivendo..." */
 #typing{
     margin: 0;
     padding: 0.4rem 1.8rem;
     background-color: #fffdf9;
     color: var(--grigio);
     font-style: italic;
-    animation: puntini 1.4s infinite;
 }
 
 /* La barra per scrivere: un'unica "pillola" con il pulsante dentro */
@@ -864,13 +754,6 @@ button:focus-visible{
     border-radius: var(--raggio);
     background-color: var(--bianco);
     box-shadow: var(--ombra);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-/* Le schede si sollevano leggermente al passaggio del mouse */
-.itinerary:hover, .booking:hover, .history-item:hover{
-    transform: translateY(-0.3rem);
-    box-shadow: var(--ombra-forte);
 }
 
 /* Riquadro in alto nelle schede: la foto dell'hotel oppure, se manca, un fondo colorato con un aereo */
@@ -1120,11 +1003,6 @@ button:focus-visible{
 
 /* ---------- Finestra con il dettaglio ---------- */
 
-@keyframes apertura{
-    from{ opacity: 0; transform: translateY(1rem) scale(0.97); }
-    to{ opacity: 1; transform: none; }
-}
-
 dialog{
     width: min(46rem, 94vw);
     max-height: 90vh;
@@ -1136,13 +1014,8 @@ dialog{
     overflow-y: auto;
 }
 
-dialog[open]{
-    animation: apertura 0.25s ease-out;
-}
-
 dialog::backdrop{
     background-color: rgba(11, 27, 58, 0.65);
-    backdrop-filter: blur(0.25rem);
 }
 
 #close-dialog{
@@ -1163,11 +1036,10 @@ dialog::backdrop{
     background: var(--grigio-chiaro);
 }
 
-#dialog-content .itinerary, #dialog-content .itinerary:hover{
+#dialog-content .itinerary{
     border: none;
     box-shadow: none;
     border-radius: 0;
-    transform: none;
 }
 
 #dialog-content .cover{
@@ -1197,16 +1069,6 @@ dialog::backdrop{
 /* ---------- Schermi piccoli (telefono e tablet) ---------- */
 
 @media (max-width: 56rem){
-    .chat-layout{
-        grid-template-columns: 1fr;
-    }
-
-    /* Sul telefono i suggerimenti passano sotto la chat, in orizzontale */
-    .chat-side{
-        position: static;
-        order: 2;
-    }
-
     .auth-hero{
         grid-template-columns: 1fr;
     }
@@ -1235,13 +1097,5 @@ dialog::backdrop{
 
     .message{
         max-width: 92%;
-    }
-}
-
-/* Chi preferisce meno movimento non vede le animazioni */
-@media (prefers-reduced-motion: reduce){
-    *, *::before, *::after{
-        animation: none !important;
-        transition: none !important;
     }
 }

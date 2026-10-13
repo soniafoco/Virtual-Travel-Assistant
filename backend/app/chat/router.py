@@ -1,12 +1,14 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.auth.router import CurrentUser, DbSession
+from app.auth.router import get_current_user
 from app.chat.schemas import ChatIn, ChatOut
 from app.core.config import settings
-from app.models.models import Booking, Conversation, Message
+from app.db.session import get_db
+from app.models.models import Booking, Conversation, Message, User
 from app.schemas.itinerary import Itinerary
 from app.services.agent import build_agent, reply
 from app.services.agent_tools import AgentContext
@@ -15,9 +17,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-
 @router.post("", response_model=ChatOut)
-def chat(dati: ChatIn, user: CurrentUser, db: DbSession):
+def chat(dati: ChatIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Un messaggio dell'utente: lo passa all'agente, salva la conversazione e restituisce la risposta."""
 
     # 1. Trovo la conversazione (deve essere dell'utente) oppure ne creo una nuova

@@ -13,7 +13,7 @@ from app.models.models import Activity, Booking, Conversation, Message, User
 from app.main import app
 from app.services import agent, agent_tools
 from app.services.planner import plan_trips
-from scripts.seed import seed
+from db_scripts.seed import seed
 
 TODAY = date(2026, 10, 12)
 
@@ -37,8 +37,11 @@ def mondo(db, monkeypatch):
     def ranker(preferences, country):
         return [(a.id, 0.5) for a in db.scalars(select(Activity).where(Activity.country == country))]
 
+    def pianifica(*a, **kw):
+        return plan_trips(*a, **{**kw, "today": TODAY}, ranker=ranker)
+
     monkeypatch.setattr(agent_tools, "rank_activities", ranker)
-    monkeypatch.setattr(agent_tools, "plan_trips", lambda *a, **kw: plan_trips(*a, **{**kw, "today": TODAY}, ranker=ranker))
+    monkeypatch.setattr(agent_tools, "plan_trips", pianifica)
 
     client = TestClient(app)
     token = client.post("/api/auth/login", data={"username": "demo@example.com", "password": "demo1234"}).json()["access_token"]
@@ -48,7 +51,10 @@ def mondo(db, monkeypatch):
 def modello_finto(monkeypatch, *turni):
     """Ogni messaggio dell'utente usa il copione successivo: una lista di risposte del modello."""
     copioni = iter(turni)
-    monkeypatch.setattr(agent, "build_model", lambda provider=None: FakeChat(messages=iter(next(copioni))))
+    def costruisci(provider=None):
+        return FakeChat(messages=iter(next(copioni)))
+
+    monkeypatch.setattr(agent, "build_model", costruisci)
 
 def test_chat_requires_login():
     assert TestClient(app).post("/api/chat", json={"message": "ciao"}).status_code == 401
@@ -117,7 +123,10 @@ def test_a_model_failure_changes_nothing(mondo, monkeypatch, db):
         def _generate(self, *args, **kwargs):
             raise RuntimeError("quota esaurita")
 
-    monkeypatch.setattr(agent, "build_model", lambda provider=None: Rotto(messages=iter([])))
+    def costruisci(provider=None):
+        return Rotto(messages=iter([]))
+
+    monkeypatch.setattr(agent, "build_model", costruisci)
     risposta = mondo.post("/api/chat", json={"message": "ciao"})
 
     assert risposta.status_code == 502

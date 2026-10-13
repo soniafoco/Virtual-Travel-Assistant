@@ -1,7 +1,7 @@
-"""Cerca su Wikimedia Commons una foto per ogni hotel del seed e salva i risultati in scripts/hotel_photos.json.
+"""Cerca su Wikimedia Commons una foto per ogni hotel del seed e salva i risultati in db_scripts/hotel_photos.json.
 
 Serve internet e va lanciato una volta sola (da backend/):
-    python -m scripts.fetch_hotel_photos
+    python -m db_scripts.fetch_hotel_photos
 
 Gli hotel del seed sono inventati: le foto sono foto indicative di hotel della stessa citta' (stelle simili),
 non degli hotel veri. Ogni foto ha una licenza libera: autore e licenza vengono salvati insieme all'indirizzo.
@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from scripts.seed_data import HOTELS
+from db_scripts.seed_data import HOTELS
 
 FILE_FOTO = Path(__file__).parent / "hotel_photos.json"
 URL_API = "https://commons.wikimedia.org/w/api.php"
@@ -74,8 +74,11 @@ def cerca(frase):
             print("   troppe richieste, aspetto", attesa, "secondi...")
             time.sleep(attesa)
 
+    def per_indice(p):
+        return p["index"]
+
     risultati = []
-    for pagina in sorted(pagine, key=lambda p: p["index"]):
+    for pagina in sorted(pagine, key=per_indice):
         info = pagina["imageinfo"][0]
         meta = info.get("extmetadata", {})
         autore = re.sub(r"<[^>]+>", "", meta.get("Artist", {}).get("value", "")).strip()  # l'autore arriva con tag HTML

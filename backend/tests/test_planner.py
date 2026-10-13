@@ -26,7 +26,7 @@ from app.schemas.itinerary import Itinerary, Requirements
 from app.services.booking import create_proposal
 from app.services.planner import assign_activities, departure_window, plan_trips
 from app.services.rag import index_activities, reset_collection
-from scripts.seed import seed
+from db_scripts.seed import seed
 
 TODAY = date(2026, 10, 12)
 HOME = "MXP"
@@ -72,7 +72,10 @@ def category_ranker(world):
             for activity_id, activity_country, category in world.activities
             if activity_country == country
         }
-        return sorted(scores.items(), key=lambda pair: -pair[1])
+        def per_punteggio(pair):
+            return -pair[1]
+
+        return sorted(scores.items(), key=per_punteggio)
 
     return rank
 
@@ -178,6 +181,22 @@ def test_requested_duration_is_respected(world, session, nights):
     assert {it.nights for it in result.itineraries} == {nights}
     check_itinerary(session, result.itineraries[0], req)
 
+def test_exact_departure_date_is_respected(world, session):
+    _, first_try = run(world, session, nights=5, budget=4000)
+    wanted = max(it.departure_date for it in first_try.itineraries)  # una data diversa dalla prima possibile
+
+    req, result = run(world, session, nights=5, budget=4000, departure_date=wanted)
+
+    assert result.ok, result.failure
+    assert {it.departure_date for it in result.itineraries} == {wanted}
+    check_itinerary(session, result.itineraries[0], req)
+
+def test_departure_date_outside_the_month_is_refused(world, session):
+    _, result = run(world, session, departure_date=date(2026, 12, 5))  # BASE e' novembre
+
+    assert not result.ok
+    assert result.failure.code == "no_flights"
+
 def test_every_day_has_an_activity(world, session):
     """Mai giorni liberi: neanche nei viaggi lunghi (fino a 14 notti)."""
     for nights in (5, 7, 10, 14):
@@ -202,7 +221,10 @@ def test_assign_activities_repeats_only_when_the_different_ones_run_out():
     giorni = [date(2026, 11, 1) + timedelta(days=i) for i in range(3)]
     a, b = SimpleNamespace(id=1, price=10), SimpleNamespace(id=2, price=10)
     options = {day: [(a, "a" + str(i)), (b, "b" + str(i))] for i, day in enumerate(giorni)}  # 2 attivita', 3 giorni
-    plan = assign_activities(giorni, options, 1, {1: 0.9, 2: 0.5}, lambda act: (0.9 if act.id == 1 else 0.5,))
+    def punteggio(act):
+        return (0.9 if act.id == 1 else 0.5,)
+
+    plan = assign_activities(giorni, options, 1, {1: 0.9, 2: 0.5}, punteggio)
     assert all(pick is not None for pick in plan.picks.values())  # nessun giorno libero
     assert {pick[0].id for pick in plan.picks.values()} == {1, 2}  # prima usa entrambe, poi ripete
 
@@ -219,7 +241,10 @@ def test_assign_activities_moves_an_activity_to_fill_every_day():
     day1, day2 = date(2026, 11, 1), date(2026, 11, 2)
     a, b = SimpleNamespace(id=1, price=10), SimpleNamespace(id=2, price=10)
     options = {day1: [(a, "a1"), (b, "b1")], day2: [(a, "a2")]}
-    plan = assign_activities([day1, day2], options, 1, {1: 0.9, 2: 0.1}, lambda act: (0.9 if act.id == 1 else 0.1,))
+    def punteggio(act):
+        return (0.9 if act.id == 1 else 0.1,)
+
+    plan = assign_activities([day1, day2], options, 1, {1: 0.9, 2: 0.1}, punteggio)
     assert plan.picks[day1][0].id == 2 and plan.picks[day2][0].id == 1  # B il primo giorno, A il secondo
 
 def test_preferences_change_the_activities(world, session):

@@ -1,6 +1,6 @@
-"""Foto degli hotel: legge scripts/hotel_photos.json (creato da fetch_hotel_photos.py).
+"""Foto degli hotel: legge db_scripts/hotel_photos.json (creato da fetch_hotel_photos.py).
 
-Il seed le usa quando crea gli hotel. Se cambiano le foto va rifatto il seed (python -m scripts.seed).
+Il seed le usa quando crea gli hotel. Se cambiano le foto va rifatto il seed (python -m db_scripts.seed).
 """
 
 import json

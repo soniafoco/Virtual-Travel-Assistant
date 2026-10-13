@@ -41,6 +41,15 @@ def test_register_validates_the_input(client):
     assert register(client, email="non-una-email").status_code == 422
     assert register(client, name="").status_code == 422
 
+def test_register_refuses_blank_names_and_passwords_that_bcrypt_cannot_hash(client):
+    assert register(client, name="   ").status_code == 422
+    assert register(client, password=" " * 8).status_code == 422
+    assert register(client, password="è" * 40).status_code == 422  # 40 caratteri ma 80 byte
+
+def test_login_with_a_password_over_72_bytes_is_refused_not_an_error(client):
+    register(client)
+    assert login(client, password="è" * 40).status_code == 401
+
 def test_login_returns_a_bearer_token(client):
     register(client)
     response = login(client, email="SONIA@example.com")  # l'email non distingue maiuscole

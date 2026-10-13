@@ -11,7 +11,7 @@ from app.models.models import Conversation, Message, User
 @pytest.fixture
 def mondo(db):
     """Un client autenticato come utente demo e un secondo utente."""
-    from scripts.seed import seed
+    from db_scripts.seed import seed
     seed(db, start=datetime(2026, 10, 12).date())
     db.add(User(email="altro@example.com", password_hash="x", name="Altro"))
     db.commit()

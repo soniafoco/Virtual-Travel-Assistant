@@ -16,7 +16,7 @@ from app.services import agent_tools
 from app.services.agent import build_agent, reply
 from app.services.agent_tools import AgentContext, build_tools
 from app.services.planner import plan_trips
-from scripts.seed import seed
+from db_scripts.seed import seed
 
 TODAY = date(2026, 10, 12)
 HOME = "MXP"
@@ -50,10 +50,16 @@ def ranker(world, monkeypatch):
             for activity_id, activity_country, category in world.activities
             if activity_country == country
         }
-        return sorted(scores.items(), key=lambda pair: -pair[1])
+        def per_punteggio(pair):
+            return -pair[1]
+
+        return sorted(scores.items(), key=per_punteggio)
+
+    def pianifica(*a, **kw):
+        return plan_trips(*a, **kw, ranker=rank)
 
     monkeypatch.setattr(agent_tools, "rank_activities", rank)
-    monkeypatch.setattr(agent_tools, "plan_trips", lambda *a, **kw: plan_trips(*a, **kw, ranker=rank))
+    monkeypatch.setattr(agent_tools, "plan_trips", pianifica)
 
 @pytest.fixture
 def ctx(world, ranker):
