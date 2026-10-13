@@ -128,7 +128,7 @@ class Booking(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     conversation_id: Mapped[int | None] = mapped_column(ForeignKey("conversations.id"), index=True, default=None)
-    # proposed -> confirmed -> cancelled; discarded = proposta sostituita da una nuova
+    # proposed -> confirmed -> cancelled
     status: Mapped[str] = mapped_column(String(20), default="proposed")
     label: Mapped[str] = mapped_column(String(40))  # "Più adatto a te", "Più economico", "Alternativa"
     country: Mapped[str] = mapped_column(String(80))

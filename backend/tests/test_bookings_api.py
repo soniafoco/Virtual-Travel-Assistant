@@ -51,7 +51,7 @@ def test_list_is_empty_without_bookings(mondo):
 
 def test_list_shows_my_bookings_newest_first(mondo, db):
     prima = crea_proposta(db)
-    seconda = crea_proposta(db)  # senza conversazione la prima non viene scartata
+    seconda = crea_proposta(db)
 
     dati = mondo.get("/api/bookings").json()
 
@@ -63,10 +63,8 @@ def test_list_shows_my_bookings_newest_first(mondo, db):
         "total_cost", "hotel_name", "hotel_stars",
     }
 
-def test_list_hides_replaced_proposals_and_other_users_bookings(mondo, db):
+def test_list_hides_other_users_bookings(mondo, db):
     visibile = crea_proposta(db)
-    sostituita = crea_proposta(db)
-    sostituita.status = "discarded"
     altro = db.scalar(select(User.id).where(User.email == "altro@example.com"))
     crea_proposta(db, user_id=altro)
     db.commit()

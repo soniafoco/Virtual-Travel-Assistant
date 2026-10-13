@@ -53,24 +53,19 @@ def same_trip(old: Booking, itinerary: Itinerary) -> bool:
 def create_proposal(session: Session, user_id: int, conversation_id: int | None, itinerary: Itinerary) -> Booking:
     """Salva un itinerario come Booking 'proposed': una riga in bookings e le righe figlie (voli, camere, attivita').
 
-    NON tocca le disponibilita': le scala solo la conferma. Le altre proposte ancora aperte
-    della stessa conversazione diventano 'discarded' (restano nello storico, ma non si
-    possono piu' confermare). Fa flush ma non commit: lo fa il chiamante.
+    NON tocca le disponibilita': le scala solo la conferma. Le altre proposte aperte restano
+    in sospeso: l'utente puo' averne piu' di una, anche nella stessa conversazione.
+    Fa flush ma non commit: lo fa il chiamante.
     """
     if conversation_id is not None:
         # se lo stesso itinerario e' gia' stato proposto (es. l'agente richiama save_proposal prima di confermare)
-        # non si crea un duplicato: si riusa la proposta aperta, altrimenti la prima finirebbe 'discarded'
+        # non si crea un duplicato: si riusa la proposta aperta
         existing = session.scalars(
             select(Booking).where(Booking.conversation_id == conversation_id, Booking.user_id == user_id, Booking.status == "proposed")
         ).all()
         for old in existing:
             if same_trip(old, itinerary):
                 return old
-        session.execute(
-            update(Booking)
-            .where(Booking.conversation_id == conversation_id, Booking.status == "proposed")
-            .values(status="discarded")
-        )
 
     booking = Booking(
         user_id=user_id, conversation_id=conversation_id, status="proposed",
@@ -172,8 +167,6 @@ def confirm_booking(session: Session, booking_id: int, user_id: int) -> Booking:
     booking = get_booking(session, booking_id, user_id)
     if booking.status == "confirmed":
         raise BookingError("Questa prenotazione e' gia' confermata.")
-    if booking.status == "discarded":
-        raise BookingError("Questa proposta e' stata sostituita da una piu' recente: conferma l'ultima.")
     if booking.status != "proposed":
         raise BookingError("Questa prenotazione e' stata annullata e non si puo' confermare.")
 
@@ -219,8 +212,6 @@ def cancel_booking(session: Session, booking_id: int, user_id: int) -> Booking:
     booking = get_booking(session, booking_id, user_id)
     if booking.status == "cancelled":
         raise BookingError("Questa prenotazione e' gia' annullata.")
-    if booking.status == "discarded":
-        raise BookingError("Questa proposta e' gia' stata sostituita da una piu' recente.")
 
     era_confermata = (booking.status == "confirmed")
     if era_confermata:
@@ -243,7 +234,7 @@ def cancel_booking(session: Session, booking_id: int, user_id: int) -> Booking:
     return booking
 
 def user_bookings(session: Session, user_id: int) -> list[Booking]:
-    """Le prenotazioni e proposte aperte dell'utente (non quelle sostituite), dalla piu' recente."""
+    """Tutte le prenotazioni e proposte dell'utente, dalla piu' recente."""
     return list(session.scalars(
-        select(Booking).where(Booking.user_id == user_id, Booking.status != "discarded").order_by(Booking.id.desc())
+        select(Booking).where(Booking.user_id == user_id).order_by(Booking.id.desc())
     ))

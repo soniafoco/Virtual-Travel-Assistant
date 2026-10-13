@@ -34,7 +34,7 @@ def trova(db: Session, id: int, user: User) -> Booking:
 
 @router.get("", response_model=list[BookingOut])
 def elenco(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Le prenotazioni e le proposte dell'utente (non quelle sostituite), dalla piu' recente."""
+    """Le prenotazioni e le proposte dell'utente, dalla piu' recente."""
     return [descrivi(p) for p in booking.user_bookings(db, user.id)]
 
 @router.get("/{id}", response_model=BookingDetail)

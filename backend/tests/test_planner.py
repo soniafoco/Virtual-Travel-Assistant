@@ -380,7 +380,7 @@ def test_create_proposal_saves_the_itinerary_without_touching_availability(world
     )
     assert after == before
 
-def test_new_proposal_discards_the_previous_one_in_the_same_conversation(world, session):
+def test_new_proposal_keeps_the_previous_one_pending(world, session):
     _, result = run(world, session)
     first_it, second_it = result.itineraries[0], result.itineraries[1]
     chat, other_chat = Conversation(user_id=DEMO_USER_ID), Conversation(user_id=DEMO_USER_ID)
@@ -393,9 +393,9 @@ def test_new_proposal_discards_the_previous_one_in_the_same_conversation(world, 
 
     session.refresh(first)
     session.refresh(elsewhere)
-    assert first.status == "discarded"
+    assert first.status == "proposed"  # la proposta precedente resta in sospeso
     assert second.status == "proposed"
-    assert elsewhere.status == "proposed"  # un'altra chat non viene toccata
+    assert elsewhere.status == "proposed"
 
 def test_saving_the_same_itinerary_twice_reuses_the_open_proposal(world, session):
     _, result = run(world, session)
@@ -406,4 +406,4 @@ def test_saving_the_same_itinerary_twice_reuses_the_open_proposal(world, session
     first = create_proposal(session, DEMO_USER_ID, chat.id, result.itineraries[0])
     again = create_proposal(session, DEMO_USER_ID, chat.id, result.itineraries[0])
 
-    assert again.id == first.id and first.status == "proposed"  # nessun duplicato, nessun 'discarded'
+    assert again.id == first.id and first.status == "proposed"  # nessun duplicato

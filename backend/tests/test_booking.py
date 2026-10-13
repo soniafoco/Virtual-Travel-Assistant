@@ -124,14 +124,6 @@ def test_not_enough_seats_is_refused(world, proposal):
     with pytest.raises(BookingError, match="volo di andata"):
         booking.confirm_booking(world, proposal.id, 1)
 
-def test_a_replaced_proposal_cannot_be_confirmed(world, proposal):
-    proposal.conversation_id = None
-    new = booking.create_proposal(world, 1, None, trip_of(proposal))  # senza conversazione non scarta le altre
-    assert new.id != proposal.id
-    proposal.status = "discarded"
-    with pytest.raises(BookingError, match="sostituita"):
-        booking.confirm_booking(world, proposal.id, 1)
-
 def test_other_users_cannot_touch_my_booking(world, proposal):
     other = world.scalar(select(User.id).where(User.email == "altro@example.com"))
     with pytest.raises(BookingError, match="Non trovo"):
@@ -139,10 +131,10 @@ def test_other_users_cannot_touch_my_booking(world, proposal):
     with pytest.raises(BookingError, match="Non trovo"):
         booking.cancel_booking(world, proposal.id, other)
 
-def test_list_hides_replaced_proposals(world, proposal):
-    proposal.status = "discarded"
-    world.flush()
-    assert booking.user_bookings(world, 1) == []
+def test_list_shows_every_status(world, proposal):
+    assert [b.id for b in booking.user_bookings(world, 1)] == [proposal.id]
+    booking.cancel_booking(world, proposal.id, 1)
+    assert [b.status for b in booking.user_bookings(world, 1)] == ["cancelled"]
 
 # --- tool dell'agente -------------------------------------------------------
 
