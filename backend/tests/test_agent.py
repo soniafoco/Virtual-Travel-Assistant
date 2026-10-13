@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.core.config import settings
 from app.db.session import Base, SessionLocal, engine
 from app.models.models import Activity, Booking
+from app.schemas.itinerary import RequirementsState
 from app.services import agent_tools
 from app.services.agent import build_agent, reply
 from app.services.agent_tools import AgentContext, build_tools
@@ -129,6 +130,38 @@ def test_generate_itineraries_explains_a_failure(tools, ctx):
 def test_generate_itineraries_reports_invalid_data_to_the_model(tools):
     result = tools["generate_itineraries"].invoke({**PLAN_ARGS, "month": 13})
     assert result.startswith("Dati non validi") and "month" in result
+
+def test_update_requirements_merges_new_data_and_lists_what_is_missing(tools, ctx):
+    first = json.loads(tools["update_requirements"].invoke({"budget": 2500, "home_airport": "mxp"}))
+    assert first["raccolti"]["home_airport"] == "MXP"
+    assert first["mancanti"] == ["country", "activities", "month"]
+
+    second = json.loads(tools["update_requirements"].invoke({"country": "Spagna", "activities": ["cultura"], "month": 11}))
+    assert second["raccolti"]["budget"] == 2500  # il dato di prima resta
+    assert second["mancanti"] == [] and ctx.state_changed
+
+def test_update_requirements_refuses_invalid_data_and_keeps_the_old_state(tools, ctx):
+    tools["update_requirements"].invoke({"budget": 2500})
+    result = tools["update_requirements"].invoke({"month": 13})
+    assert result.startswith("Dati non validi") and "month" in result
+    assert ctx.state.budget == 2500 and ctx.state.month is None
+
+def test_generate_itineraries_uses_the_saved_state(tools, ctx):
+    tools["update_requirements"].invoke(PLAN_ARGS)
+    data = json.loads(tools["generate_itineraries"].invoke({"nights": 5}))  # il resto viene dallo stato
+    assert len(data) == len(ctx.itineraries) > 0
+    assert ctx.state.nights == 5 and ctx.state.budget == PLAN_ARGS["budget"]
+
+def test_generate_itineraries_says_what_is_missing(tools, ctx):
+    data = json.loads(tools["generate_itineraries"].invoke({"budget": 2000}))
+    assert data["errore"] == "dati_mancanti" and "country" in data["mancanti"]
+    assert ctx.state.budget == 2000 and ctx.itineraries == []
+
+def test_the_state_goes_in_the_agent_prompt(ctx):
+    ctx.state = RequirementsState(budget=2500, country="Spagna")
+    testo = agent_tools.testo_stato(ctx.state)
+    assert "2500" in testo and "Spagna" in testo
+    assert "mancanti: activities, month, home_airport" in testo
 
 def test_save_proposal_stores_the_chosen_itinerary(tools, ctx, world):
     tools["generate_itineraries"].invoke(PLAN_ARGS)

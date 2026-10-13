@@ -118,6 +118,25 @@ def test_itineraries_survive_between_messages_up_to_the_booking(mondo, monkeypat
     db.expire_all()
     assert db.scalars(select(Booking)).one().status == "confirmed"
 
+def test_requirements_are_saved_and_survive_the_next_messages(mondo, monkeypatch, db):
+    dati = {k: v for k, v in PLAN_ARGS.items() if k != "nights"}
+    modello_finto(
+        monkeypatch,
+        [tool_call("update_requirements", **dati), AIMessage(content="Quante notti?")],
+        [tool_call("generate_itineraries", nights=5), AIMessage(content="Ecco gli itinerari.")],
+    )
+    primo = mondo.post("/api/chat", json={"message": "Spagna a novembre, 3000 euro, in due, da MXP, cultura"}).json()
+    db.expire_all()
+    salvati = db.get(Conversation, primo["conversation_id"]).requirements
+    assert salvati["state"]["budget"] == 3000 and salvati["state"]["nights"] is None
+
+    # secondo messaggio: il tool usa i dati salvati, e generare gli itinerari non cancella lo stato
+    secondo = mondo.post("/api/chat", json={"conversation_id": primo["conversation_id"], "message": "5 notti"}).json()
+    assert secondo["itineraries"]
+    db.expire_all()
+    salvati = db.get(Conversation, primo["conversation_id"]).requirements
+    assert salvati["state"]["country"] == "Spagna" and salvati["state"]["nights"] == 5 and salvati["itineraries"]
+
 def test_a_model_failure_changes_nothing(mondo, monkeypatch, db):
     class Rotto(FakeChat):
         def _generate(self, *args, **kwargs):

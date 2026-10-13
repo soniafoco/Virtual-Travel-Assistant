@@ -22,6 +22,35 @@ class Requirements(BaseModel):
     travelers: int = Field(default=1, ge=1, le=settings.max_travelers)
     nights: int = Field(default=settings.default_nights, ge=settings.min_nights, le=settings.max_nights)
 
+class RequirementsState(BaseModel):
+    """I dati raccolti finora in una conversazione: tutti facoltativi, perche' all'inizio non c'e' niente.
+    Si salva nella conversazione e si rimette nel prompt a ogni richiesta, cosi' l'agente non li dimentica."""
+
+    budget: float | None = Field(default=None, gt=0)
+    country: str | None = Field(default=None, min_length=1)
+    activities: list[str] | None = Field(default=None, min_length=1)
+    month: int | None = Field(default=None, ge=1, le=12)
+    departure_date: date | None = None
+    travelers: int | None = Field(default=None, ge=1, le=settings.max_travelers)
+    nights: int | None = Field(default=None, ge=settings.min_nights, le=settings.max_nights)
+    home_airport: str | None = Field(default=None, min_length=3, max_length=3)
+
+    def missing(self) -> list[str]:
+        """I dati obbligatori ancora vuoti (travelers, nights e departure_date hanno un default)."""
+        mancanti = []
+        for nome in ["budget", "country", "activities", "month", "home_airport"]:
+            if getattr(self, nome) is None:
+                mancanti.append(nome)
+        return mancanti
+
+    def to_requirements(self) -> Requirements:
+        """I requisiti completi per il planner; viaggiatori e notti mancanti prendono il default di Requirements."""
+        dati = {}
+        for nome in ["budget", "country", "activities", "month", "departure_date", "travelers", "nights"]:
+            if getattr(self, nome) is not None:
+                dati[nome] = getattr(self, nome)
+        return Requirements(**dati)
+
 class FlightLeg(BaseModel):
     flight_id: int
     origin: str

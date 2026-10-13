@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.models import Activity, Flight, Hotel
-from app.schemas.itinerary import Itinerary, Requirements
+from app.schemas.itinerary import Itinerary, RequirementsState
 from app.services import booking
 from app.services.booking import BookingError
 from app.services.planner import departure_window, plan_trips
@@ -22,6 +22,32 @@ from app.services.rag import min_affinity, rank_activities
 
 def dumps(data) -> str:
     return json.dumps(data, ensure_ascii=False, default=str)
+
+def unisci_stato(stato: RequirementsState, nuovi: dict) -> RequirementsState:
+    """Lo stato con i dati nuovi sopra quelli vecchi. I dati None non cambiano nulla; "" azzera la data di partenza.
+    Alza ValidationError se un dato non e' valido."""
+    dati = stato.model_dump()
+    for nome, valore in nuovi.items():
+        if valore is None:
+            continue
+        if valore == "":
+            dati[nome] = None
+        elif nome == "home_airport":
+            dati[nome] = valore.strip().upper()
+        else:
+            dati[nome] = valore
+    return RequirementsState(**dati)
+
+def testo_stato(stato: RequirementsState) -> str:
+    """I dati raccolti e quelli che mancano, in italiano: va nel prompt dell'agente a ogni richiesta."""
+    raccolti = {nome: valore for nome, valore in stato.model_dump(mode="json").items() if valore is not None}
+    testo = "Dati gia' raccolti in questa conversazione: " + (dumps(raccolti) if raccolti else "nessuno") + "."
+    mancanti = stato.missing()
+    if mancanti:
+        testo += " Dati ancora mancanti: " + ", ".join(mancanti) + "."
+    else:
+        testo += " Hai tutti i dati obbligatori."
+    return testo
 
 class AgentContext:
     """Cio' che i tool condividono durante una conversazione."""
@@ -33,6 +59,8 @@ class AgentContext:
         self.today = today or date.today()
         self.itineraries: list[Itinerary] = []  # gli ultimi proposti dal planner, numerati da 1
         self.itineraries_changed = False  # True se in questa richiesta generate_itineraries ha sostituito la lista
+        self.state = RequirementsState()  # i requisiti raccolti finora nella conversazione
+        self.state_changed = False  # True se in questa richiesta un tool ha modificato lo stato
         self.last_proposal_id: int | None = None  # l'ultima proposta salvata in questa conversazione
 
 def summarize(number: int, it: Itinerary) -> dict:
@@ -142,26 +170,57 @@ def build_tools(ctx: AgentContext) -> list[BaseTool]:
         ])
 
     @tool
+    def update_requirements(
+        budget: float | None = None, country: str | None = None, activities: list[str] | None = None,
+        month: int | None = None, travelers: int | None = None, nights: int | None = None,
+        departure_date: str | None = None, home_airport: str | None = None,
+    ) -> str:
+        """Registra i dati del viaggio appena detti dall'utente. Chiamalo OGNI VOLTA che l'utente dice o cambia
+        un dato (anche uno solo), passando solo i dati nuovi: gli altri restano quelli gia' salvati.
+        budget = totale in euro per tutti; month = 1-12; home_airport = codice IATA; departure_date = AAAA-MM-GG
+        (stringa vuota per toglierla). Restituisce i dati raccolti e quelli che mancano ancora."""
+        nuovi = dict(
+            budget=budget, country=country, activities=activities, month=month, travelers=travelers, nights=nights,
+            departure_date=departure_date, home_airport=home_airport,
+        )
+        try:
+            ctx.state = unisci_stato(ctx.state, nuovi)
+        except ValidationError as error:
+            return "Dati non validi: " + "; ".join(f"{e['loc'][0]}: {e['msg']}" for e in error.errors())
+        ctx.state_changed = True
+        return dumps({"raccolti": ctx.state.model_dump(mode="json"), "mancanti": ctx.state.missing()})
+
+    @tool
     def generate_itineraries(
-        budget: float, country: str, activities: list[str], month: int, home_airport: str,
-        travelers: int = 1, nights: int = 7, departure_date: str | None = None,
+        budget: float | None = None, country: str | None = None, activities: list[str] | None = None,
+        month: int | None = None, home_airport: str | None = None,
+        travelers: int | None = None, nights: int | None = None, departure_date: str | None = None,
     ) -> str:
         """Costruisce gli itinerari (volo andata e ritorno, hotel, un'attivita' al giorno) entro il budget.
-        Chiamalo solo quando hai tutti i dati. budget = totale in euro per tutti; month = 1-12;
-        home_airport = codice IATA di partenza. departure_date = giorno di partenza esatto in formato AAAA-MM-GG:
-        passalo SEMPRE se l'utente indica o cambia la data (es. "dal 13 al 18 novembre" = departure_date del 13
-        e nights = 5); il mese deve coincidere. Senza departure_date il planner sceglie lui i giorni nel mese.
+        Chiamalo solo quando hai tutti i dati. I dati che non passi vengono presi da quelli gia' registrati
+        (vedi update_requirements); se ne manca qualcuno il tool dice quali. budget = totale in euro per tutti;
+        month = 1-12; home_airport = codice IATA di partenza. departure_date = giorno di partenza esatto in formato
+        AAAA-MM-GG: passalo SEMPRE se l'utente indica o cambia la data (es. "dal 13 al 18 novembre" = departure_date
+        del 13 e nights = 5); il mese deve coincidere. Senza departure_date il planner sceglie lui i giorni nel mese.
         Restituisce gli itinerari numerati, oppure il motivo per cui non esistono (se il budget e' troppo basso
         indica la cifra minima)."""
+        nuovi = dict(
+            budget=budget, country=country, activities=activities, month=month, travelers=travelers, nights=nights,
+            departure_date=departure_date, home_airport=home_airport,
+        )
         try:
-            req = Requirements(
-                budget=budget, country=country, activities=activities, month=month, travelers=travelers, nights=nights,
-                departure_date=departure_date or None,
-            )
+            stato = unisci_stato(ctx.state, nuovi)
+            if stato.missing():
+                ctx.state = stato  # i dati validi gia' passati si salvano comunque
+                ctx.state_changed = True
+                return dumps({"errore": "dati_mancanti", "mancanti": stato.missing()})
+            req = stato.to_requirements()
         except ValidationError as error:
             return "Dati non validi: " + "; ".join(f"{e['loc'][0]}: {e['msg']}" for e in error.errors())
 
-        result = plan_trips(ctx.session, req, home_airport.upper(), today=ctx.today)
+        ctx.state = stato  # i requisiti usati restano salvati, anche se poi il planner non trova nulla
+        ctx.state_changed = True
+        result = plan_trips(ctx.session, req, stato.home_airport, today=ctx.today)
         ctx.itineraries_changed = True
         if result.failure:
             ctx.itineraries = []
@@ -227,5 +286,5 @@ def build_tools(ctx: AgentContext) -> list[BaseTool]:
         bookings = booking.user_bookings(ctx.session, ctx.user_id)
         return dumps([describe(b) for b in bookings]) if bookings else "Nessuna prenotazione."
 
-    return [list_destinations, list_hotels, find_airport, list_flight_dates, search_activities, generate_itineraries, save_proposal,
-            confirm_booking, cancel_booking, list_my_bookings]
+    return [list_destinations, list_hotels, find_airport, list_flight_dates, search_activities, update_requirements,
+            generate_itineraries, save_proposal, confirm_booking, cancel_booking, list_my_bookings]

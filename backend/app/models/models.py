@@ -197,7 +197,7 @@ class Conversation(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    # budget, country, activities, month, travelers, nights (vedi app/schemas/itinerary.py: Requirements)
+    # {"state": requisiti raccolti (RequirementsState), "itineraries": ultimi itinerari proposti}, vedi app/schemas/itinerary.py
     requirements: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

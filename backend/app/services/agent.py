@@ -12,7 +12,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.core.config import settings
 from app.core.logging import tronca
-from app.services.agent_tools import AgentContext, build_tools
+from app.services.agent_tools import AgentContext, build_tools, testo_stato
 
 SYSTEM_PROMPT = """Sei l'assistente di viaggio di Virtual Travel Assistant. Parli in italiano, in modo cordiale e conciso.
 
@@ -35,6 +35,9 @@ Per costruire gli itinerari ti servono questi dati:
   di aver cambiato le date senza aver richiamato il tool. L'anno e' il prossimo in cui cade quella data.
 
 Regole:
+- Ogni volta che l'utente dice o cambia uno di questi dati, chiama subito update_requirements con quel dato
+  (solo i dati nuovi). In fondo a questo messaggio trovi sempre l'elenco dei dati gia' raccolti e di quelli
+  mancanti: fidati di quello, non della cronologia, e non richiedere un dato che e' gia' raccolto.
 - Chiedi solo i dati che mancano, uno o due per volta. Non inventarli.
 - Il mese va passato ai tool come numero da 1 a 12 (gennaio = 1, ..., dicembre = 12).
 - Se search_activities non trova nulla di affine a una preferenza, dillo all'utente e chiedigli un'altra
@@ -114,7 +117,9 @@ def build_model(provider: str | None = None) -> BaseChatModel:
 
 def build_agent(ctx: AgentContext, model: BaseChatModel | None = None):
     """Un agente legato al contesto di una conversazione. `model` e' iniettabile per i test."""
-    agent = create_agent(model or build_model(), build_tools(ctx), system_prompt=SYSTEM_PROMPT)
+    # lo stato della conversazione (dati raccolti e mancanti) e' in fondo al prompt: il modello lo vede anche se la cronologia e' stata tagliata
+    prompt = SYSTEM_PROMPT + "\n" + testo_stato(ctx.state)
+    agent = create_agent(model or build_model(), build_tools(ctx), system_prompt=prompt)
     return agent.with_config(callbacks=[LogAgente()], run_name="agente-viaggi")  # ogni chiamata dell'agente finisce nel log
 
 def reply(agent, history: list[dict], session_id: str | None = None) -> str:

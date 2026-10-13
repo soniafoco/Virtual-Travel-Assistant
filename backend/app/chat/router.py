@@ -9,7 +9,7 @@ from app.chat.schemas import ChatIn, ChatOut
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.models import Booking, Conversation, Message, User
-from app.schemas.itinerary import Itinerary
+from app.schemas.itinerary import Itinerary, RequirementsState
 from app.services.agent import build_agent, reply
 from app.services.agent_tools import AgentContext
 
@@ -44,6 +44,9 @@ def chat(dati: ChatIn, user: User = Depends(get_current_user), db: Session = Dep
     for itinerario in conversazione.requirements.get("itineraries", []):
         contesto.itineraries.append(Itinerary.model_validate(itinerario))
 
+    # Anche i requisiti raccolti finora (budget, nazione, mese...): il modello li vede nel prompt a ogni richiesta
+    contesto.state = RequirementsState.model_validate(conversazione.requirements.get("state", {}))
+
     # Anche l'ultima proposta salvata (quella che "conferma" deve prenotare) va ricavata dal database
     contesto.last_proposal_id = db.scalar(
         select(Booking.id)
@@ -61,8 +64,14 @@ def chat(dati: ChatIn, user: User = Depends(get_current_user), db: Session = Dep
 
     # 5. Salvo la risposta e gli ultimi itinerari della conversazione, poi confermo tutto insieme
     db.add(Message(conversation_id=conversazione.id, role="assistant", content=risposta))
-    if contesto.itineraries_changed:  # generate_itineraries ha sostituito la lista degli itinerari
-        conversazione.requirements = {"itineraries": [it.model_dump(mode="json") for it in contesto.itineraries]}
+    if contesto.itineraries_changed or contesto.state_changed:
+        # Riassegno un dizionario nuovo (SQLAlchemy non vede le modifiche dentro un JSON) tenendo ciò che non è cambiato
+        requisiti = dict(conversazione.requirements)
+        if contesto.itineraries_changed:  # generate_itineraries ha sostituito la lista degli itinerari
+            requisiti["itineraries"] = [it.model_dump(mode="json") for it in contesto.itineraries]
+        if contesto.state_changed:  # un tool ha aggiornato i requisiti raccolti
+            requisiti["state"] = contesto.state.model_dump(mode="json")
+        conversazione.requirements = requisiti
     db.commit()
 
     return ChatOut(
