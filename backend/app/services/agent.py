@@ -117,7 +117,12 @@ def build_agent(ctx: AgentContext, model: BaseChatModel | None = None):
     agent = create_agent(model or build_model(), build_tools(ctx), system_prompt=SYSTEM_PROMPT)
     return agent.with_config(callbacks=[LogAgente()], run_name="agente-viaggi")  # ogni chiamata dell'agente finisce nel log
 
-def reply(agent, history: list[dict]) -> str:
-    """Risposta dell'agente alla conversazione (lista di {"role": "user"|"assistant", "content": ...})."""
-    result = agent.invoke({"messages": history})
+def reply(agent, history: list[dict], session_id: str | None = None) -> str:
+    """Risposta dell'agente alla conversazione (lista di {"role": "user"|"assistant", "content": ...}).
+
+    `session_id` e' l'id della chat: Phoenix raggruppa nella scheda Sessions tutte le trace con lo stesso valore."""
+    config = {}
+    if session_id is not None:
+        config = {"metadata": {"session_id": session_id}}  # l'instrumentor lo salva come attributo session.id
+    result = agent.invoke({"messages": history}, config=config)
     return result["messages"][-1].text

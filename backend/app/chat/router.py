@@ -53,7 +53,7 @@ def chat(dati: ChatIn, user: User = Depends(get_current_user), db: Session = Dep
 
     # 4. Chiedo la risposta all'agente. Se il modello non risponde annullo tutto (messaggio, proposte, prenotazioni)
     try:
-        risposta = reply(build_agent(contesto), storia)
+        risposta = reply(build_agent(contesto), storia, session_id=str(conversazione.id))
     except Exception:
         db.rollback()
         logger.exception("L'agente non ha risposto (conversazione %s)", conversazione.id)
