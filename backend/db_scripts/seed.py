@@ -27,7 +27,6 @@ from app.models.models import (
     RoomAvailability,
     User,
 )
-from db_scripts.hotel_photos import carica_foto
 from db_scripts.init_db import init_db
 from db_scripts.seed_data import (
     ACTIVITIES,
@@ -55,7 +54,6 @@ def build_dataset(start: date, rng_seed: int = 42, num_days: int = DAYS) -> dict
     rng = random.Random(rng_seed)
     days = [start + timedelta(days=i) for i in range(num_days)]
 
-    photos = carica_foto()  # foto degli hotel (db_scripts/hotel_photos.json), se sono state scaricate
     hotels, base_price = [], {}
     for city in CITIES:
         for name, stars, price, description in HOTELS[city["city"]]:
@@ -64,7 +62,6 @@ def build_dataset(start: date, rng_seed: int = 42, num_days: int = DAYS) -> dict
             hotels.append({
                 "id": hotel_id, "name": name, "country": city["country"], "city": city["city"],
                 "stars": stars, "description": description,
-                "image_url": photos.get(name, {}).get("image_url"), "image_credit": photos.get(name, {}).get("image_credit"),
             })
 
     rooms, room_multiplier = [], {}

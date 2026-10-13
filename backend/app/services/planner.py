@@ -333,7 +333,6 @@ def to_itinerary(label: str, c: Candidate, req: Requirements, affinity: dict[int
         flight_out=to_leg(c.flight_out), flight_return=to_leg(c.flight_return),
         hotel=HotelStay(
             hotel_id=c.hotel.id, name=c.hotel.name, stars=c.hotel.stars,
-            image_url=c.hotel.image_url, image_credit=c.hotel.image_credit,
             rooms=[
                 RoomStay(
                     room_id=room.id, name=room.name, capacity=room.capacity,

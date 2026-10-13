@@ -28,7 +28,7 @@ function formattaDataEstesa(data)
 
 
 // Funzione che crea la scheda di una prenotazione. Ogni prenotazione ha i campi: id, status, city, country, departure_date, return_date,
-// nights, travelers, total_cost, hotel_name, hotel_stars, hotel_image_url
+// nights, travelers, total_cost, hotel_name, hotel_stars
 function creaScheda(prenotazione)
 {
     var scheda = document.getElementById("booking-template").content.cloneNode(true);
@@ -41,11 +41,10 @@ function creaScheda(prenotazione)
     scheda.querySelector(".booking-travelers").textContent = "👥 " + prenotazione.travelers + " viaggiatori";
     scheda.querySelector(".booking-total").textContent = prenotazione.total_cost + " euro";
 
-    // Stato (con il colore giusto) e foto dell'hotel
+    // Stato (con il colore giusto)
     var stato = scheda.querySelector(".booking-status");
     stato.textContent = testoStato(prenotazione.status);
     stato.classList.add("status-" + prenotazione.status);
-    mostraFoto(scheda.querySelector(".booking-photo"), prenotazione.hotel_image_url, prenotazione.hotel_name);
 
     var bottoneDettaglio = scheda.querySelector(".detail-button");
     var bottoneConferma = scheda.querySelector(".confirm-button");

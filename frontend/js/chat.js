@@ -72,22 +72,6 @@ function formattaData(data)
 }
 
 
-// Funzione che mostra la foto di un hotel in un elemento img; senza indirizzo (o se l'immagine non si carica) l'immagine resta nascosta
-function mostraFoto(immagine, indirizzo, descrizione)
-{
-    if(!indirizzo)
-    {
-        immagine.hidden = true;
-        return;
-    }
-
-    immagine.alt = "Foto di " + descrizione;
-    immagine.addEventListener("error", function() { immagine.hidden = true; });
-    immagine.src = indirizzo;
-    immagine.hidden = false;
-}
-
-
 /* Funzione che crea la scheda di un itinerario.
    - numero: posizione nella lista, parte da 1 (è il numero che l'assistente usa per salvarlo); null nel dettaglio di una prenotazione
    - conBottone: true se la scheda deve avere il pulsante "Scegli questo itinerario" (nella chat), false nel dettaglio */
@@ -119,10 +103,6 @@ function creaSchedaItinerario(itinerario, numero, conBottone)
     }
     scheda.querySelector(".hotel-name").textContent = itinerario.hotel.name + " (" + itinerario.hotel.stars + " stelle)";
     scheda.querySelector(".hotel-rooms").textContent = "Camere: " + camere.join(", ");
-
-    // Foto dell'hotel (se c'è) con l'autore e la licenza
-    mostraFoto(scheda.querySelector(".hotel-photo"), itinerario.hotel.image_url, itinerario.hotel.name);
-    scheda.querySelector(".hotel-credit").textContent = itinerario.hotel.image_credit ? "Foto: " + itinerario.hotel.image_credit : "";
 
     // Un'attività per ogni giorno (se per un giorno non ce ne sono: giorno libero)
     var elenco = scheda.querySelector(".days-list");

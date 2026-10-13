@@ -168,6 +168,8 @@ p{
 /* ---------- Contenuto principale ---------- */
 
 main{
+    box-sizing: border-box;
+    width: 100%;
     max-width: 70rem;
     margin: 2.2rem auto;
     padding: 0 1.2rem 2rem 1.2rem;
@@ -554,8 +556,20 @@ button:focus-visible{
 
 /* ---------- Chat ---------- */
 
+/* La chat occupa tutta la larghezza disponibile ed e' centrata nella pagina */
+#view-chat{
+    width: 100%;
+}
+
+.chat-layout{
+    width: 100%;
+    max-width: 62rem;
+    margin: 0 auto;
+}
+
 /* Il pannello della chat: barra in alto, messaggi, campo di testo */
 .chat-panel{
+    width: 100%;
     overflow: hidden;
     border: 0.06rem solid var(--bordo);
     border-radius: 1.6rem;
@@ -621,8 +635,8 @@ button:focus-visible{
 
 /* L'area dei messaggi scorre quando i messaggi sono tanti */
 #messages, #history-messages{
-    min-height: 24rem;
-    max-height: 62vh;
+    min-height: 30rem;
+    max-height: 68vh;
     overflow-y: auto;
     padding: 1.4rem 1.6rem;
     background-color: #fffdf9;
@@ -756,61 +770,17 @@ button:focus-visible{
     box-shadow: var(--ombra);
 }
 
-/* Riquadro in alto nelle schede: la foto dell'hotel oppure, se manca, un fondo colorato con un aereo */
-.cover{
-    position: relative;
-    height: 12.5rem;
-    background: linear-gradient(135deg, var(--sole), var(--corallo) 45%, var(--notte-chiaro));
-}
-
-.cover::after{
-    content: "✈️";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 3.2rem;
-    opacity: 0.6;
-}
-
-/* La foto copre il riquadro (e nasconde l'aereo) quando c'è */
-.cover img{
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Ombra scura in basso sulla foto: fa risaltare l'etichetta */
-.cover::before{
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    height: 5rem;
-    background: linear-gradient(transparent, rgba(11, 27, 58, 0.6));
-}
-
-/* L'etichetta ("Più adatto a te", "Più economico"...) sta sopra la foto, in basso a sinistra */
+/* L'etichetta ("Più adatto a te", "Più economico"...) in alto nella scheda */
 .itinerary-label{
-    position: absolute;
-    left: 1rem;
-    bottom: 0.9rem;
-    z-index: 3;
-    margin: 0;
+    display: inline-block;
+    margin: 0 0 0.8rem 0;
     padding: 0.25rem 0.9rem;
     border-radius: 2rem;
     background: var(--caldo);
-    color: white !important;
-    font-family: inherit !important;
-    font-size: 0.9rem !important;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
     font-weight: 700;
-    box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.3);
 }
 
 .itinerary-body, .booking-body{
@@ -866,12 +836,6 @@ button:focus-visible{
 
 .hotel-name{
     font-weight: 700;
-}
-
-.hotel-credit{
-    margin-top: 0.4rem;
-    color: var(--grigio);
-    font-size: 0.75rem;
 }
 
 /* In fondo alla scheda: la parte "tagliando" del biglietto, separata da una linea tratteggiata */
@@ -943,14 +907,9 @@ button:focus-visible{
 }
 
 .booking-status{
-    position: absolute;
-    top: 0.9rem;
-    right: 0.9rem;
-    z-index: 3;
+    display: inline-block;
     padding: 0.25rem 1rem;
     border-radius: 2rem;
-    background-color: white;
-    box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.2);
     font-size: 0.85rem;
     font-weight: 700;
 }
@@ -1040,10 +999,6 @@ dialog::backdrop{
     border: none;
     box-shadow: none;
     border-radius: 0;
-}
-
-#dialog-content .cover{
-    height: 16rem;
 }
 
 

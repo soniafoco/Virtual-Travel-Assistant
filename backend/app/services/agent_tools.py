@@ -172,8 +172,9 @@ def build_tools(ctx: AgentContext) -> list[BaseTool]:
 
     @tool
     def save_proposal(itinerary_number: int) -> str:
-        """Salva come proposta l'itinerario scelto dall'utente, usando il numero mostrato da generate_itineraries.
-        Non conferma la prenotazione e non scala le disponibilita'."""
+        """Salva come proposta UN SOLO itinerario, solo se l'utente ha detto esplicitamente di volerlo salvare o
+        scegliere (numero mostrato da generate_itineraries). Non chiamarlo mai di tua iniziativa e mai per
+        tutti gli itinerari. Non conferma la prenotazione e non scala le disponibilita'."""
         if ctx.user_id is None:
             return "Per salvare una proposta serve un utente autenticato."
         if not 1 <= itinerary_number <= len(ctx.itineraries):

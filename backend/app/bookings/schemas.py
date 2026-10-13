@@ -18,7 +18,6 @@ class BookingOut(BaseModel):
     total_cost: float
     hotel_name: str
     hotel_stars: int
-    hotel_image_url: str | None = None
 
 class BookingDetail(BookingOut):
     """Il dettaglio di una prenotazione: in piu' l'itinerario completo (voli, hotel, giorno per giorno)."""

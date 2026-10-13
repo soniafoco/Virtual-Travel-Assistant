@@ -60,7 +60,7 @@ def test_list_shows_my_bookings_newest_first(mondo, db):
     assert primo["status"] == "proposed" and primo["city"] and primo["hotel_name"] and primo["travelers"] == 2
     assert set(primo) == {
         "id", "status", "city", "country", "departure_date", "return_date", "nights", "travelers",
-        "total_cost", "hotel_name", "hotel_stars", "hotel_image_url",
+        "total_cost", "hotel_name", "hotel_stars",
     }
 
 def test_list_hides_replaced_proposals_and_other_users_bookings(mondo, db):

@@ -144,7 +144,7 @@ def itinerary_of(booking: Booking) -> Itinerary:
         flight_out=flights["out"], flight_return=flights["return"],
         hotel=HotelStay(
             hotel_id=booking.hotel.id, name=booking.hotel.name, stars=booking.hotel.stars,
-            image_url=booking.hotel.image_url, image_credit=booking.hotel.image_credit, rooms=list(stays.values()),
+            rooms=list(stays.values()),
         ),
         days=days,
         costs=CostBreakdown(

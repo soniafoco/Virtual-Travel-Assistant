@@ -182,15 +182,12 @@
     </div>
   </template>
 
-  <!-- L'itinerario è un "biglietto": in alto la foto con l'etichetta, poi i dettagli, in fondo il totale -->
+  <!-- L'itinerario è un "biglietto": in alto l'etichetta, poi i dettagli, in fondo il totale -->
   <template id="itinerary-template">
     <article class="itinerary">
-      <div class="cover">
-        <img class="hotel-photo" alt="" hidden>
-        <h3 class="itinerary-label"></h3>
-      </div>
-
       <div class="itinerary-body">
+        <h3 class="itinerary-label"></h3>
+
         <header>
           <p class="itinerary-trip"></p> <!-- citta', date, notti -->
         </header>
@@ -207,7 +204,6 @@
           <h4>🏨 Hotel</h4>
           <p class="hotel-name"></p>
           <p class="hotel-rooms"></p>
-          <p class="hotel-credit"></p>
         </section>
 
         <section class="itinerary-days">
@@ -233,12 +229,8 @@
 
   <template id="booking-template">
     <article class="booking">
-      <div class="cover">
-        <img class="booking-photo" alt="" hidden>
-        <span class="booking-status"></span>
-      </div>
-
       <div class="booking-body">
+        <span class="booking-status"></span>
         <h3 class="booking-city"></h3>
         <p class="booking-hotel"></p>
         <p class="booking-dates"></p>

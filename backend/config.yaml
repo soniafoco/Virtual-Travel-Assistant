@@ -90,7 +90,7 @@ airports:
 # =============================== Server ===============================
 # reseed: false = `python -m db_scripts.seed` non tocca un database che ha gia' dei dati (chat e prenotazioni al sicuro);
 # true = cancella tutto e lo ricrea da zero. Con false, per rifare il seed bisogna prima metterlo a true.
-reseed: false
+reseed: true
 # DATABASE_URL, CHROMA_PATH, LOG_FILE e LOG_LEVEL stanno in .env (percorsi relativi a backend/)
 access_token_minutes: 120
 cors_origins:

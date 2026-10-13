@@ -45,8 +45,6 @@ class HotelStay(BaseModel):
     hotel_id: int
     name: str
     stars: int
-    image_url: str | None = None  # foto dell'hotel (vedi db_scripts/fetch_hotel_photos.py)
-    image_credit: str | None = None  # autore e licenza della foto
     rooms: list[RoomStay]  # le camere scelte, tutte libere per tutte le notti
 
 class ActivityPick(BaseModel):

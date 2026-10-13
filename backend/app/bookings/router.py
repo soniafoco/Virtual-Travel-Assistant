@@ -23,7 +23,6 @@ def descrivi(prenotazione: Booking) -> dict:
         "nights": prenotazione.nights, "travelers": prenotazione.travelers,
         "total_cost": float(prenotazione.total_cost),
         "hotel_name": prenotazione.hotel.name, "hotel_stars": prenotazione.hotel.stars,
-        "hotel_image_url": getattr(prenotazione.hotel, "image_url", None),
     }
 
 def trova(db: Session, id: int, user: User) -> Booking:
