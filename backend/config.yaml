@@ -52,8 +52,8 @@ chat_history_messages: 20         # quanti messaggi precedenti dare al modello a
 
 # =============================== Tracing (Phoenix) ===============================
 # Phoenix mostra le trace dell'agente (chiamate al modello, tool, input e output) su http://localhost:6006.
-# Il server va avviato a parte: .venv-phoenix\Scripts\phoenix serve
-tracing_enabled: true
+# Il server va avviato a parte: phoenix serve
+tracing_enabled: false
 phoenix_endpoint: http://localhost:6006/v1/traces
 phoenix_project: virtual-travel-assistant
 
@@ -90,7 +90,8 @@ airports:
 # =============================== Server ===============================
 # reseed: false = `python -m db_scripts.seed` non tocca un database che ha gia' dei dati (chat e prenotazioni al sicuro);
 # true = cancella tutto e lo ricrea da zero. Con false, per rifare il seed bisogna prima metterlo a true.
-reseed: true
+reseed: false
+
 # DATABASE_URL, CHROMA_PATH, LOG_FILE e LOG_LEVEL stanno in .env (percorsi relativi a backend/)
 access_token_minutes: 120
 cors_origins:
