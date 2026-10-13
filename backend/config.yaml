@@ -27,7 +27,7 @@ chroma_collection: activities     # il nome reale ha il suffisso del provider: a
 # (fino a 0.80 Gemini, fino a 0.39 locale).
 min_affinity:
   gemini: 0.82
-  huggingface: 0.45
+  huggingface: 0.4
 
 max_activities: 10                # quante attivita' mostra al massimo search_activities
 

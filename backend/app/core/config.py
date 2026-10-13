@@ -52,7 +52,7 @@ class Settings(BaseSettings):
 
     # RAG e ricerca attivita'
     chroma_collection: str = "activities"
-    min_affinity: dict[Provider, float] = {"gemini": 0.82, "huggingface": 0.45}
+    min_affinity: dict[Provider, float] = {"gemini": 0.82, "huggingface": 0.4}
     max_activities: int = 10
     category_queries: dict[str, str] = {}
 
