@@ -6,31 +6,31 @@ Ogni riquadro è una tabella con le sue colonne (PK chiave primaria, FK chiave e
 
 ```mermaid
 flowchart TD
-    USERS["<b>USERS</b><br/>id PK<br/>email UK<br/>password_hash<br/>name"]
+    USERS["<table><tr><th colspan='2'>USERS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>email</td><td>UK</td></tr><tr><td align='left'>password_hash</td><td></td></tr><tr><td align='left'>name</td><td></td></tr></table>"]
 
-    CONVERSATIONS["<b>CONVERSATIONS</b><br/>id PK<br/>user_id FK<br/>requirements<br/>created_at<br/>updated_at"]
+    CONVERSATIONS["<table><tr><th colspan='2'>CONVERSATIONS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>user_id</td><td>FK</td></tr><tr><td align='left'>requirements</td><td></td></tr><tr><td align='left'>created_at</td><td></td></tr><tr><td align='left'>updated_at</td><td></td></tr></table>"]
 
-    MESSAGES["<b>MESSAGES</b><br/>id PK<br/>conversation_id FK<br/>role<br/>content<br/>created_at"]
+    MESSAGES["<table><tr><th colspan='2'>MESSAGES</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>conversation_id</td><td>FK</td></tr><tr><td align='left'>role</td><td></td></tr><tr><td align='left'>content</td><td></td></tr><tr><td align='left'>created_at</td><td></td></tr></table>"]
 
-    BOOKINGS["<b>BOOKINGS</b><br/>id PK<br/>user_id FK<br/>conversation_id FK<br/>status<br/>label<br/>country<br/>city<br/>hotel_id FK<br/>travelers<br/>nights<br/>departure_date<br/>return_date<br/>total_cost<br/>created_at"]
+    BOOKINGS["<table><tr><th colspan='2'>BOOKINGS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>user_id</td><td>FK</td></tr><tr><td align='left'>conversation_id</td><td>FK</td></tr><tr><td align='left'>status</td><td></td></tr><tr><td align='left'>label</td><td></td></tr><tr><td align='left'>country</td><td></td></tr><tr><td align='left'>city</td><td></td></tr><tr><td align='left'>hotel_id</td><td>FK</td></tr><tr><td align='left'>travelers</td><td></td></tr><tr><td align='left'>nights</td><td></td></tr><tr><td align='left'>departure_date</td><td></td></tr><tr><td align='left'>return_date</td><td></td></tr><tr><td align='left'>total_cost</td><td></td></tr><tr><td align='left'>created_at</td><td></td></tr></table>"]
 
-    BOOKING_FLIGHTS["<b>BOOKING_FLIGHTS</b><br/>id PK<br/>booking_id FK<br/>flight_id FK<br/>direction<br/>price_per_person"]
+    BOOKING_FLIGHTS["<table><tr><th colspan='2'>BOOKING_FLIGHTS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>booking_id</td><td>FK</td></tr><tr><td align='left'>flight_id</td><td>FK</td></tr><tr><td align='left'>direction</td><td></td></tr><tr><td align='left'>price_per_person</td><td></td></tr></table>"]
 
-    BOOKING_ROOMS["<b>BOOKING_ROOMS</b><br/>id PK<br/>booking_id FK<br/>room_availability_id FK<br/>price"]
+    BOOKING_ROOMS["<table><tr><th colspan='2'>BOOKING_ROOMS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>booking_id</td><td>FK</td></tr><tr><td align='left'>room_availability_id</td><td>FK</td></tr><tr><td align='left'>price</td><td></td></tr></table>"]
 
-    BOOKING_ACTIVITIES["<b>BOOKING_ACTIVITIES</b><br/>id PK<br/>booking_id FK<br/>activity_availability_id FK<br/>price_per_person<br/>affinity"]
+    BOOKING_ACTIVITIES["<table><tr><th colspan='2'>BOOKING_ACTIVITIES</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>booking_id</td><td>FK</td></tr><tr><td align='left'>activity_availability_id</td><td>FK</td></tr><tr><td align='left'>price_per_person</td><td></td></tr><tr><td align='left'>affinity</td><td></td></tr></table>"]
 
-    FLIGHTS["<b>FLIGHTS</b><br/>id PK<br/>origin_airport<br/>destination_airport<br/>destination_country<br/>city<br/>departure<br/>arrival<br/>price<br/>seats_left"]
+    FLIGHTS["<table><tr><th colspan='2'>FLIGHTS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>origin_airport</td><td></td></tr><tr><td align='left'>destination_airport</td><td></td></tr><tr><td align='left'>destination_country</td><td></td></tr><tr><td align='left'>city</td><td></td></tr><tr><td align='left'>departure</td><td></td></tr><tr><td align='left'>arrival</td><td></td></tr><tr><td align='left'>price</td><td></td></tr><tr><td align='left'>seats_left</td><td></td></tr></table>"]
 
-    HOTELS["<b>HOTELS</b><br/>id PK<br/>name<br/>country<br/>city<br/>stars<br/>description"]
+    HOTELS["<table><tr><th colspan='2'>HOTELS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>name</td><td></td></tr><tr><td align='left'>country</td><td></td></tr><tr><td align='left'>city</td><td></td></tr><tr><td align='left'>stars</td><td></td></tr><tr><td align='left'>description</td><td></td></tr></table>"]
 
-    ROOMS["<b>ROOMS</b><br/>id PK<br/>hotel_id FK<br/>name<br/>capacity"]
+    ROOMS["<table><tr><th colspan='2'>ROOMS</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>hotel_id</td><td>FK</td></tr><tr><td align='left'>name</td><td></td></tr><tr><td align='left'>capacity</td><td></td></tr></table>"]
 
-    ROOM_AVAILABILITY["<b>ROOM_AVAILABILITY</b><br/>id PK<br/>room_id FK<br/>night<br/>price_per_night<br/>is_free"]
+    ROOM_AVAILABILITY["<table><tr><th colspan='2'>ROOM_AVAILABILITY</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>room_id</td><td>FK</td></tr><tr><td align='left'>night</td><td></td></tr><tr><td align='left'>price_per_night</td><td></td></tr><tr><td align='left'>is_free</td><td></td></tr></table>"]
 
-    ACTIVITIES["<b>ACTIVITIES</b><br/>id PK<br/>name<br/>country<br/>city<br/>category<br/>price<br/>description<br/>target"]
+    ACTIVITIES["<table><tr><th colspan='2'>ACTIVITIES</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>name</td><td></td></tr><tr><td align='left'>country</td><td></td></tr><tr><td align='left'>city</td><td></td></tr><tr><td align='left'>category</td><td></td></tr><tr><td align='left'>price</td><td></td></tr><tr><td align='left'>description</td><td></td></tr><tr><td align='left'>target</td><td></td></tr></table>"]
 
-    ACTIVITY_AVAILABILITY["<b>ACTIVITY_AVAILABILITY</b><br/>id PK<br/>activity_id FK<br/>day<br/>spots_left"]
+    ACTIVITY_AVAILABILITY["<table><tr><th colspan='2'>ACTIVITY_AVAILABILITY</th></tr><tr><td align='left'>id</td><td>PK</td></tr><tr><td align='left'>activity_id</td><td>FK</td></tr><tr><td align='left'>day</td><td></td></tr><tr><td align='left'>spots_left</td><td></td></tr></table>"]
 
     CONVERSATIONS -- user_id --> USERS
     MESSAGES -- conversation_id --> CONVERSATIONS
