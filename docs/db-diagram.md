@@ -1,148 +1,58 @@
 # Schema del database
 
-Diagramma ER dello schema implementato in `backend/app/models/models.py`.
+Schema implementato in `backend/app/models/models.py`.
+
+Ogni riquadro è una tabella con le sue colonne. Ogni freccia va da una tabella a quella che richiama e porta il nome della colonna che le collega (per esempio `BOOKINGS --user_id--> USERS` significa che la prenotazione contiene l'id dell'utente).
 
 ```mermaid
-erDiagram
-    USERS ||--o{ CONVERSATIONS : ha
-    USERS ||--o{ BOOKINGS : possiede
-    CONVERSATIONS ||--o{ MESSAGES : contiene
-    CONVERSATIONS |o--o{ BOOKINGS : origina
-    BOOKINGS ||--|{ BOOKING_FLIGHTS : voli
-    BOOKINGS ||--|{ BOOKING_ROOMS : camere_e_notti
-    BOOKINGS ||--o{ BOOKING_ACTIVITIES : attivita_e_giorni
-    HOTELS ||--o{ BOOKINGS : scelto_in
-    FLIGHTS ||--o{ BOOKING_FLIGHTS : prenotato_in
-    ROOM_AVAILABILITY ||--o{ BOOKING_ROOMS : occupata_da
-    ACTIVITY_AVAILABILITY ||--o{ BOOKING_ACTIVITIES : scalata_da
-    HOTELS ||--|{ ROOMS : ha
-    ROOMS ||--o{ ROOM_AVAILABILITY : una_riga_per_notte
-    ACTIVITIES ||--o{ ACTIVITY_AVAILABILITY : una_riga_per_giorno
+flowchart TD
+    USERS["<b>USERS</b><br/>id<br/>email<br/>password_hash<br/>name"]
 
-    USERS {
-        int id PK
-        string email UK
-        string password_hash
-        string name
-    }
+    CONVERSATIONS["<b>CONVERSATIONS</b><br/>id<br/>user_id<br/>requirements<br/>created_at<br/>updated_at"]
 
-    CONVERSATIONS {
-        int id PK
-        int user_id FK
-        json requirements
-        datetime created_at
-        datetime updated_at
-    }
+    MESSAGES["<b>MESSAGES</b><br/>id<br/>conversation_id<br/>role<br/>content<br/>created_at"]
 
-    MESSAGES {
-        int id PK
-        int conversation_id FK
-        string role
-        string content
-        datetime created_at
-    }
+    BOOKINGS["<b>BOOKINGS</b><br/>id<br/>user_id<br/>conversation_id<br/>hotel_id<br/>status<br/>label<br/>country<br/>city<br/>travelers<br/>nights<br/>departure_date<br/>return_date<br/>total_cost<br/>created_at"]
 
-    BOOKINGS {
-        int id PK
-        int user_id FK
-        int conversation_id FK
-        string status
-        string label
-        string country
-        string city
-        int hotel_id FK
-        int travelers
-        int nights
-        date departure_date
-        date return_date
-        decimal total_cost
-        datetime created_at
-    }
+    BOOKING_FLIGHTS["<b>BOOKING_FLIGHTS</b><br/>id<br/>booking_id<br/>flight_id<br/>direction<br/>price_per_person"]
 
-    BOOKING_FLIGHTS {
-        int id PK
-        int booking_id FK
-        int flight_id FK
-        string direction
-        decimal price_per_person
-    }
+    BOOKING_ROOMS["<b>BOOKING_ROOMS</b><br/>id<br/>booking_id<br/>room_availability_id<br/>price"]
 
-    BOOKING_ROOMS {
-        int id PK
-        int booking_id FK
-        int room_availability_id FK
-        decimal price
-    }
+    BOOKING_ACTIVITIES["<b>BOOKING_ACTIVITIES</b><br/>id<br/>booking_id<br/>activity_availability_id<br/>price_per_person<br/>affinity"]
 
-    BOOKING_ACTIVITIES {
-        int id PK
-        int booking_id FK
-        int activity_availability_id FK
-        decimal price_per_person
-        float affinity
-    }
+    FLIGHTS["<b>FLIGHTS</b><br/>id<br/>origin_airport<br/>destination_airport<br/>destination_country<br/>city<br/>departure<br/>arrival<br/>price<br/>seats_left"]
 
-    FLIGHTS {
-        int id PK
-        string origin_airport
-        string destination_airport
-        string destination_country
-        string city
-        datetime departure
-        datetime arrival
-        decimal price
-        int seats_left
-    }
+    HOTELS["<b>HOTELS</b><br/>id<br/>name<br/>country<br/>city<br/>stars<br/>description"]
 
-    HOTELS {
-        int id PK
-        string name
-        string country
-        string city
-        int stars
-        string description
-    }
+    ROOMS["<b>ROOMS</b><br/>id<br/>hotel_id<br/>name<br/>capacity"]
 
-    ROOMS {
-        int id PK
-        int hotel_id FK
-        string name
-        int capacity
-    }
+    ROOM_AVAILABILITY["<b>ROOM_AVAILABILITY</b><br/>id<br/>room_id<br/>night<br/>price_per_night<br/>is_free"]
 
-    ROOM_AVAILABILITY {
-        int id PK
-        int room_id FK
-        date night
-        decimal price_per_night
-        bool is_free
-    }
+    ACTIVITIES["<b>ACTIVITIES</b><br/>id<br/>name<br/>country<br/>city<br/>category<br/>price<br/>description<br/>target"]
 
-    ACTIVITIES {
-        int id PK
-        string name
-        string country
-        string city
-        string category
-        decimal price
-        string description
-        string target
-    }
+    ACTIVITY_AVAILABILITY["<b>ACTIVITY_AVAILABILITY</b><br/>id<br/>activity_id<br/>day<br/>spots_left"]
 
-    ACTIVITY_AVAILABILITY {
-        int id PK
-        int activity_id FK
-        date day
-        int spots_left
-    }
+    CONVERSATIONS -- user_id --> USERS
+    MESSAGES -- conversation_id --> CONVERSATIONS
+    BOOKINGS -- user_id --> USERS
+    BOOKINGS -- conversation_id --> CONVERSATIONS
+    BOOKINGS -- hotel_id --> HOTELS
+    BOOKING_FLIGHTS -- booking_id --> BOOKINGS
+    BOOKING_FLIGHTS -- flight_id --> FLIGHTS
+    BOOKING_ROOMS -- booking_id --> BOOKINGS
+    BOOKING_ROOMS -- room_availability_id --> ROOM_AVAILABILITY
+    BOOKING_ACTIVITIES -- booking_id --> BOOKINGS
+    BOOKING_ACTIVITIES -- activity_availability_id --> ACTIVITY_AVAILABILITY
+    ROOMS -- hotel_id --> HOTELS
+    ROOM_AVAILABILITY -- room_id --> ROOMS
+    ACTIVITY_AVAILABILITY -- activity_id --> ACTIVITIES
 ```
 
 ## Note sul diagramma
 
-- **Simboli sulle linee**: `||` esattamente uno, `|o` zero o uno, `o{` zero o molti, `|{` uno o molti.
-- **`BOOKINGS`**: una riga per prenotazione con i dati generali; il dettaglio sta nelle tabelle figlie `BOOKING_FLIGHTS` (andata e ritorno), `BOOKING_ROOMS` (una riga per camera e notte) e `BOOKING_ACTIVITIES` (una riga per attività e giorno), con chiave esterna verso le righe di disponibilità: confermare e annullare toccano quelle righe. I prezzi sono quelli del momento della proposta.
+- **`BOOKINGS`**: una riga per prenotazione con i dati generali; il dettaglio sta nelle tabelle figlie `BOOKING_FLIGHTS` (andata e ritorno), `BOOKING_ROOMS` (una riga per camera e notte) e `BOOKING_ACTIVITIES` (una riga per attività e giorno), che puntano alle righe di disponibilità: confermare e annullare toccano quelle righe. I prezzi sono quelli del momento della proposta.
 - **`ROOMS`**: una riga per camera fisica; `ROOM_AVAILABILITY.is_free` dice se è ancora libera in quella notte.
-- **Unicità composte** (non disegnabili in Mermaid): `ROOM_AVAILABILITY(room_id, night)` e `ACTIVITY_AVAILABILITY(activity_id, day)`.
+- **Unicità composte**: `ROOM_AVAILABILITY(room_id, night)` e `ACTIVITY_AVAILABILITY(activity_id, day)`.
 - **Stati di `BOOKINGS.status`**: `proposed`, `confirmed`, `cancelled`.
 - **Unità dei prezzi**: voli e attività per persona; camere per camera (intera) e per notte.
 - **Chroma** non è nel diagramma: un documento per attività, con lo stesso `id` di `ACTIVITIES.id`.

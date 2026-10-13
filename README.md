@@ -64,22 +64,24 @@ SQLite, con chiavi esterne attive e vincoli a livello di schema (unicità camera
 ChromaDB contiene un documento per attività, con lo stesso id della tabella SQL. È un indice derivato: se cambiano le attività si rigenera con `index_vectors`.
 
 ```mermaid
-erDiagram
-    USERS ||--o{ CONVERSATIONS : ha
-    CONVERSATIONS ||--o{ MESSAGES : contiene
-    USERS ||--o{ BOOKINGS : possiede
-    BOOKINGS ||--|{ BOOKING_FLIGHTS : voli
-    BOOKINGS ||--|{ BOOKING_ROOMS : "camere e notti"
-    BOOKINGS ||--o{ BOOKING_ACTIVITIES : "attività e giorni"
-    FLIGHTS ||--o{ BOOKING_FLIGHTS : prenotato_in
-    HOTELS ||--|{ ROOMS : ha
-    ROOMS ||--o{ ROOM_AVAILABILITY : "una riga per notte"
-    ROOM_AVAILABILITY ||--o{ BOOKING_ROOMS : occupata_da
-    ACTIVITIES ||--o{ ACTIVITY_AVAILABILITY : "una riga per giorno"
-    ACTIVITY_AVAILABILITY ||--o{ BOOKING_ACTIVITIES : scalata_da
+flowchart TD
+    CONVERSATIONS -- user_id --> USERS
+    MESSAGES -- conversation_id --> CONVERSATIONS
+    BOOKINGS -- user_id --> USERS
+    BOOKINGS -- conversation_id --> CONVERSATIONS
+    BOOKINGS -- hotel_id --> HOTELS
+    BOOKING_FLIGHTS -- booking_id --> BOOKINGS
+    BOOKING_FLIGHTS -- flight_id --> FLIGHTS
+    BOOKING_ROOMS -- booking_id --> BOOKINGS
+    BOOKING_ROOMS -- room_availability_id --> ROOM_AVAILABILITY
+    BOOKING_ACTIVITIES -- booking_id --> BOOKINGS
+    BOOKING_ACTIVITIES -- activity_availability_id --> ACTIVITY_AVAILABILITY
+    ROOMS -- hotel_id --> HOTELS
+    ROOM_AVAILABILITY -- room_id --> ROOMS
+    ACTIVITY_AVAILABILITY -- activity_id --> ACTIVITIES
 ```
 
-I prezzi di voli e attività sono per persona, quelli delle camere per camera e per notte. Lo schema completo, con tutte le colonne, è in [docs/db-diagram.md](docs/db-diagram.md).
+Ogni freccia va da una tabella a quella che richiama, con il nome della colonna che le collega. I prezzi di voli e attività sono per persona, quelli delle camere per camera e per notte. Lo schema completo, con tutte le colonne, è in [docs/db-diagram.md](docs/db-diagram.md).
 
 ## Logiche interne
 
