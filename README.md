@@ -10,7 +10,7 @@ Assistente virtuale conversazionale per organizzare viaggi. L'utente indica in c
 | Ricerca semantica (RAG) | ChromaDB come database vettoriale, embedding di Gemini |
 | Agente | LangChain con Gemini (Groq e Hugging Face si possono scegliere da configurazione) |
 | Autenticazione | JWT, password con bcrypt |
-| Frontend | HTML, CSS e JavaScript semplice: nessun framework, nessun build, nessun Node |
+| Frontend | HTML, CSS e JavaScript semplice|
 | Test e osservabilità | pytest, log su file, tracing opzionale con Phoenix |
 
 ## Architettura
@@ -56,7 +56,7 @@ frontend/
 
 SQLite, con chiavi esterne attive e vincoli a livello di schema (unicità camera+notte e attività+giorno, contatori mai negativi).
 
-- **Utenti, conversazioni, messaggi.** Ogni conversazione conserva i requisiti raccolti finora (budget, nazione, ecc.), quindi lo stato non vive in memoria.
+- **Utenti, conversazioni, messaggi.** Ogni conversazione conserva i requisiti raccolti finora (budget, nazione, ecc.) e i messaggi scambiati dall'utente.
 - **Catalogo.** Voli (con data e posti rimasti), hotel, camere, attività.
 - **Disponibilità a righe per data.** Una riga per camera e notte (con prezzo e se è libera) e una per attività e giorno (con i posti rimasti). Prenotare vuol dire consumare queste righe.
 - **Prenotazioni.** Una riga generale più tre tabelle figlie (voli, camere per notte, attività per giorno) che puntano alle righe di disponibilità e conservano i prezzi del momento della proposta.
@@ -87,7 +87,7 @@ Ogni freccia va da una tabella a quella che richiama, con il nome della colonna 
 
 **Planner (`services/planner.py`).** Non usa l'LLM e lavora in sola lettura sul database. Per la nazione richiesta enumera le combinazioni di volo di andata, volo di ritorno e hotel nel mese scelto, seleziona le camere meno costose che ospitano tutti i viaggiatori, assegna un'attività diversa a ogni giorno (come problema di abbinamento, in modo che un giorno con poche opzioni non resti scoperto a causa di scelte precedenti) e scarta le soluzioni che superano il budget. Restituisce due itinerari in evidenza ("Più adatto a te" e "Più economico") e alcune alternative. Se non trova soluzioni ne indica il motivo e, se il limite è il budget, il costo minimo necessario.
 
-**RAG (`services/rag.py`).** Ordina le attività in base alle preferenze dell'utente (ad esempio "musei", "qualcosa di romantico", "avventura"). Esegue una ricerca per similarità per ogni preferenza e applica una soglia minima di affinità, per non proporre attività poco pertinenti.
+**RAG (`services/rag.py`).** Ordina le attività in base alle preferenze dell'utente (ad esempio "musei", "qualcosa di romantico", "avventura"). Esegue una ricerca per similarità per ogni preferenza e applica una soglia minima di affinità (che cambia in base al provider del modello di embedding), per non proporre attività poco pertinenti.
 
 **Prenotazione in tre stati.** `proposed` (salvata dalla chat), `confirmed` e `cancelled`. La conferma scala i posti di voli e attività e occupa le camere in un'unica transazione: se anche una sola risorsa non è più disponibile, non viene modificato nulla. L'annullamento esegue l'operazione inversa.
 
@@ -96,15 +96,15 @@ Ogni freccia va da una tabella a quella che richiama, con il nome della colonna 
 ## Note e decisioni di progetto
 
 - **L'LLM non decide mai prezzi, date o disponibilità.** Sono calcolati dal planner con query SQL; l'LLM sceglie tra le proposte e le spiega. I numeri sono quindi sempre corretti e il planner è testabile senza alcun modello.
-- **Il DB in SQLite è la fonte di verità.** Chroma serve a ordinare le attività per affinità, ma disponibilità e prezzo di ogni attività proposta sono sempre verificati in SQL.
+- **Il DB in SQLite è la fonte primaria.** Chroma serve a ordinare le attività per affinità, ma disponibilità e prezzo di ogni attività proposta sono sempre verificati nel DB.
 - **Disponibilità modellata con una riga per data**, invece di contatori generici. Il modello è più verboso, ma rende la conferma semplice e sicura (un `UPDATE` condizionato per riga) e permette di sapere con precisione cosa libera un annullamento.
 - **Il contesto della chat viene ricostruito dal database a ogni richiesta.** Gli ultimi itinerari mostrati e l'ultima proposta sono salvati nel DB, così richieste come "prendo il primo" o "conferma" hanno un riferimento chiaro nel messaggio successivo, anche dopo un riavvio del server.
 - **Autenticazione senza sessioni.** Il server firma un JWT al login e il frontend lo invia a ogni richiesta. Le password sono salvate solo come hash bcrypt.
 - **Configurazione separata.** `config.yaml` contiene provider, modelli e parametri; `.env` solo segreti e percorsi. Cambiare LLM o provider di embedding richiede la modifica di una riga.
-- **Periodo espresso come mese.** L'utente indica il mese; le date esatte sono scelte dal planner in base ai voli disponibili. La durata è decisa dall'utente (7 notti di default).
-- **Dati sintetici.** Città, voli, hotel e attività sono dati di prova generati dallo script di seed. 
+- **Periodo di viaggio e numero di notti.** L'utente indica il mese; le date esatte sono scelte dal planner in base ai voli disponibili. La durata è decisa dall'utente (7 notti di default).
+- **Dati sintetici.** Città, voli, hotel e attività sono dati di prova generati dallo script di seed. Le principali destinazioni sono in Europa.
 
-## Avvio rapido
+## Come runnare
 
 Servono Python 3.11+ e una chiave API di Google AI Studio (Gemini).
 
@@ -126,7 +126,7 @@ python -m db_scripts.index_vectors      # indicizza le attività in ChromaDB
 uvicorn app.main:app --reload
 ```
 
-In un secondo terminale, il frontend (serve un server statico, non aprire il file con `file://`):
+In un secondo terminale, il frontend:
 
 ```
 cd frontend
