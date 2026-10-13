@@ -7,8 +7,8 @@ Assistente virtuale conversazionale per organizzare viaggi. L'utente indica in c
 | Parte | Tecnologie |
 |---|---|
 | Backend | Python 3.11, FastAPI, SQLAlchemy 2, SQLite |
-| Ricerca semantica (RAG) | ChromaDB come database vettoriale, embedding di Gemini |
-| Agente | LangChain con Gemini (Groq e Hugging Face si possono scegliere da configurazione) |
+| Ricerca semantica (RAG) | ChromaDB come database vettoriale; embedding con `gemini-embedding-001` (default) oppure `paraphrase-multilingual-MiniLM-L12-v2` in locale (Hugging Face) |
+| Agente | LangChain con `gemini-3.5-flash-lite` (default); da configurazione si possono scegliere Groq (`openai/gpt-oss-120b`) o Hugging Face (`HuggingFaceTB/SmolLM-135M`) |
 | Autenticazione | JWT, password con bcrypt |
 | Frontend | HTML, CSS e JavaScript semplice|
 | Test e osservabilità | pytest, log su file, tracing opzionale con Phoenix |
@@ -103,6 +103,12 @@ Ogni freccia va da una tabella a quella che richiama, con il nome della colonna 
 - **Configurazione separata.** `config.yaml` contiene provider, modelli e parametri; `.env` solo segreti e percorsi. Cambiare LLM o provider di embedding richiede la modifica di una riga.
 - **Periodo di viaggio e numero di notti.** L'utente indica il mese; le date esatte sono scelte dal planner in base ai voli disponibili. La durata è decisa dall'utente (7 notti di default).
 - **Dati sintetici.** Città, voli, hotel e attività sono dati di prova generati dallo script di seed. Le principali destinazioni sono in Europa.
+- **Fuso orario non gestito.** Il planner lavora sulle date dei voli (partenza e arrivo) senza considerare il fuso orario: se partenza e arrivo sono in fusi diversi, il giorno di arrivo potrebbe non essere corretto. Anche "da domani in poi" si basa sulla data del server.
+- **Una sola attività al giorno.** Ogni giorno del viaggio ha esattamente un'attività, senza fasce orarie né tempi di spostamento. Se le attività diverse non bastano per tutti i giorni, se ne ripete una. L'ultimo giorno non include attività.
+- **Un'attività viene proposta anche se poco affine.** L'affinità serve a ordinare le attività, non a escluderle: ogni giorno ne ha sempre una, anche se il suo punteggio è basso. La soglia minima di affinità vale solo per i risultati dello strumento di ricerca. L'alternativa sarebbe stata lasciare giorni senza attività o proporre solo plan veramente affini (ma poco realistico se ci sono poche attività). 
+- **Prezzi uguali per tutti.** Voli e attività costano lo stesso a ogni viaggiatore (nessuna differenza tra adulti, bambini e neonati) e le camere si scelgono solo per capienza.
+- **Le proposte non bloccano la disponibilità.** Salvare una proposta non occupa voli, camere né attività: solo la conferma scala i posti. Una proposta può quindi non essere più confermabile se nel frattempo qualcun altro ha prenotato le stesse risorse; in quel caso la conferma fallisce e non cambia nulla. Le proposte non hanno una scadenza.
+- **Limiti di viaggiatori e notti.** Al massimo 8 viaggiatori e da 1 a 14 notti (7 di default). I valori si cambiano in `config.yaml` (`max_travelers`, `min_nights`, `max_nights`, `default_nights`).
 
 ## Come runnare
 
@@ -115,7 +121,9 @@ python -m venv .venv
 cd backend
 pip install -r ..\requirements.txt
 
-# 2. Segreti: copia il file di esempio e inserisci GEMINI_API_KEY e una SECRET_KEY lunga e casuale
+# 2. Segreti: copia il file di esempio in backend/.env e inserisci lì le chiavi API: GEMINI_API_KEY (sempre necessaria
+#    con la configurazione di default), GROQ_API_KEY o HF_TOKEN solo se scegli quei provider in config.yaml,
+#    e una SECRET_KEY lunga e casuale
 copy .env.example .env
 
 # 3. Dati di prova e indice vettoriale (sempre da backend/)
